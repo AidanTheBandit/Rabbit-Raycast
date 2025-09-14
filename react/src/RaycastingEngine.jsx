@@ -294,18 +294,20 @@ const RaycastingEngine = () => {
       <canvas ref={canvasRef} className="game-canvas" />
       <div className="touch-controls">
         <div className="dpad">
-          <button onTouchStart={() => handleTouch('up', true)} onTouchEnd={() => handleTouch('up', false)}
+          <button className="up" onTouchStart={() => handleTouch('up', true)} onTouchEnd={() => handleTouch('up', false)}
                   onMouseDown={() => handleTouch('up', true)} onMouseUp={() => handleTouch('up', false)}>↑</button>
-          <button onTouchStart={() => handleTouch('left', true)} onTouchEnd={() => handleTouch('left', false)}
+          <button className="left" onTouchStart={() => handleTouch('left', true)} onTouchEnd={() => handleTouch('left', false)}
                   onMouseDown={() => handleTouch('left', true)} onMouseUp={() => handleTouch('left', false)}>←</button>
-          <button onTouchStart={() => handleTouch('right', true)} onTouchEnd={() => handleTouch('right', false)}
+          <button className="right" onTouchStart={() => handleTouch('right', true)} onTouchEnd={() => handleTouch('right', false)}
                   onMouseDown={() => handleTouch('right', true)} onMouseUp={() => handleTouch('right', false)}>→</button>
-          <button onTouchStart={() => handleTouch('down', true)} onTouchEnd={() => handleTouch('down', false)}
+          <button className="down" onTouchStart={() => handleTouch('down', true)} onTouchEnd={() => handleTouch('down', false)}
                   onMouseDown={() => handleTouch('down', true)} onMouseUp={() => handleTouch('down', false)}>↓</button>
         </div>
         <div className="action-buttons">
-          <button onTouchStart={() => handleTouch('shoot', true)} onMouseDown={() => handleTouch('shoot', true)}>FIRE</button>
-          <button onTouchStart={() => handleTouch('strafe', true)} onTouchEnd={() => handleTouch('strafe', false)}
+          <button className="shoot" onTouchStart={() => handleTouch('shoot', true)} onMouseDown={() => handleTouch('shoot', true)}>FIRE</button>
+          <button className="use" onTouchStart={() => handleTouch('use', true)} onTouchEnd={() => handleTouch('use', false)}
+                  onMouseDown={() => handleTouch('use', true)} onMouseUp={() => handleTouch('use', false)}>USE</button>
+          <button className="strafe" onTouchStart={() => handleTouch('strafe', true)} onTouchEnd={() => handleTouch('strafe', false)}
                   onMouseDown={() => handleTouch('strafe', true)} onMouseUp={() => handleTouch('strafe', false)}>STRAFE</button>
         </div>
       </div>

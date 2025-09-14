@@ -158,6 +158,24 @@ html, body {
   background-color: rgba(255, 0, 0, 1);
 }
 
+.action-btn.use {
+  background-color: rgba(0, 255, 0, 0.8);
+  border-color: #00ff00;
+}
+
+.action-btn.use:active {
+  background-color: rgba(0, 255, 0, 1);
+}
+
+.action-btn.strafe {
+  background-color: rgba(0, 0, 255, 0.8);
+  border-color: #0000ff;
+}
+
+.action-btn.strafe:active {
+  background-color: rgba(0, 0, 255, 1);
+}
+
 /* Landscape Mode - When R1 is rotated horizontally */
 @media (orientation: landscape) {
   .touch-controls {
