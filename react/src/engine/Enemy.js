@@ -1,10 +1,10 @@
 import { GAME_CONSTANTS } from './Constants.js';
 
 export class Enemy {
-  constructor(x, y, game) {
+  constructor(x, y, scene) {
     this.x = x;
     this.y = y;
-    this.game = game;
+    this.scene = scene;
     this.health = GAME_CONSTANTS.ENEMY_HEALTH;
     this.speed = GAME_CONSTANTS.ENEMY_SPEED;
     this.angle = Math.random() * Math.PI * 2;
@@ -14,9 +14,20 @@ export class Enemy {
     this.size = GAME_CONSTANTS.ENEMY_SIZE;
   }
 
+  // Scene system methods
+  onAddedToScene() {
+    // Called when entity is added to scene
+  }
+
+  onRemovedFromScene() {
+    // Called when entity is removed from scene
+  }
+
   update(deltaTime) {
-    const dx = this.game.player.x - this.x;
-    const dy = this.game.player.y - this.y;
+    if (!this.scene || !this.scene.player || !this.scene.engine) return;
+
+    const dx = this.scene.player.x - this.x;
+    const dy = this.scene.player.y - this.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     // Line of sight check
@@ -28,7 +39,7 @@ export class Enemy {
         const newX = this.x + Math.cos(moveAngle) * this.speed * (deltaTime / 16.67);
         const newY = this.y + Math.sin(moveAngle) * this.speed * (deltaTime / 16.67);
 
-        if (this.game.isValidPosition(newX, newY)) {
+        if (this.scene.engine.physics.isValidPosition(newX, newY)) {
           this.x = newX;
           this.y = newY;
         }
@@ -47,7 +58,7 @@ export class Enemy {
       const newX = this.x + Math.cos(this.angle) * this.speed * 0.5 * (deltaTime / 16.67);
       const newY = this.y + Math.sin(this.angle) * this.speed * 0.5 * (deltaTime / 16.67);
 
-      if (this.game.isValidPosition(newX, newY)) {
+      if (this.scene.engine.physics.isValidPosition(newX, newY)) {
         this.x = newX;
         this.y = newY;
       }
@@ -55,22 +66,26 @@ export class Enemy {
   }
 
   hasLineOfSight() {
-    const dx = this.game.player.x - this.x;
-    const dy = this.game.player.y - this.y;
+    if (!this.scene || !this.scene.player) return false;
+
+    const dx = this.scene.player.x - this.x;
+    const dy = this.scene.player.y - this.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     // Cast ray to check for walls
     const angle = Math.atan2(dy, dx);
-    const rayDistance = this.game.castRay(angle);
+    const rayDistance = this.scene.engine.physics.castRay(this.scene.player.x, this.scene.player.y, angle, distance + 1);
 
     return rayDistance >= distance;
   }
 
   attackPlayer() {
+    if (!this.scene || !this.scene.player) return;
+
     // Deal damage to player
-    this.game.player.takeDamage(GAME_CONSTANTS.ENEMY_ATTACK_DAMAGE);
-    if (!this.game.player.isAlive()) {
-      this.game.gameState = 'gameOver';
+    this.scene.player.takeDamage(GAME_CONSTANTS.ENEMY_ATTACK_DAMAGE);
+    if (!this.scene.player.isAlive()) {
+      this.scene.gameState = 'gameOver';
     }
   }
 
@@ -78,13 +93,20 @@ export class Enemy {
     this.health -= damage;
     if (this.health <= 0) {
       // Enemy dies
-      this.game.enemies = this.game.enemies.filter(e => e !== this);
-      this.game.score += GAME_CONSTANTS.SCORE_PER_ENEMY;
+      if (this.scene) {
+        this.scene.enemies = this.scene.enemies.filter(e => e !== this);
+        this.scene.score += GAME_CONSTANTS.SCORE_PER_ENEMY;
 
-      // Check if level is complete
-      if (this.game.enemies.length === 0) {
-        this.game.nextLevel();
+        // Check if level is complete
+        if (this.scene.enemies.length === 0) {
+          this.scene.nextLevel();
+        }
       }
     }
+  }
+
+  render(renderer) {
+    // This method is no longer used since rendering is handled by the Renderer
+    // But keeping it for compatibility
   }
 }

@@ -62,11 +62,11 @@ const RaycastingEngine = () => {
         </div>
       </div>
       <div className="hud">
-        <span>Health: {gameState.health}</span>
-        <span>Ammo: {gameState.ammo}</span>
-        <span>Level: {gameState.level}</span>
-        <span>Enemies: {gameState.enemies}</span>
-        <span>Score: {gameState.score}</span>
+        <span>Health: {engineRef.current?.sceneManager?.currentScene?.gameStats?.health || 100}</span>
+        <span>Ammo: {engineRef.current?.sceneManager?.currentScene?.gameStats?.ammo || 50}</span>
+        <span>Level: {engineRef.current?.sceneManager?.currentScene?.gameStats?.level || 1}</span>
+        <span>Enemies: {engineRef.current?.sceneManager?.currentScene?.gameStats?.enemies || 0}</span>
+        <span>Score: {engineRef.current?.sceneManager?.currentScene?.gameStats?.score || 0}</span>
       </div>
     </div>
   );

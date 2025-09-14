@@ -9,10 +9,23 @@ export class Player {
     this.ammo = GAME_CONSTANTS.PLAYER_START_AMMO;
   }
 
-  move(dx, dy, game) {
+  // Scene system methods
+  onAddedToScene() {
+    // Called when entity is added to scene
+  }
+
+  onRemovedFromScene() {
+    // Called when entity is removed from scene
+  }
+
+  update(deltaTime) {
+    // Player update logic is handled in the scene
+  }
+
+  move(dx, dy, scene) {
     const newX = this.x + dx;
     const newY = this.y + dy;
-    if (game.isValidPosition(newX, newY)) {
+    if (scene && scene.engine && scene.engine.physics.isValidPosition(newX, newY)) {
       this.x = newX;
       this.y = newY;
       return true;
@@ -39,5 +52,9 @@ export class Player {
 
   isAlive() {
     return this.health > 0;
+  }
+
+  render(renderer) {
+    // Player rendering is handled by the scene
   }
 }

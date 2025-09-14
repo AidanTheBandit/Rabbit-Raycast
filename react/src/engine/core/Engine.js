@@ -125,6 +125,10 @@ export class Engine {
    */
   render() {
     if (this.sceneManager.currentScene) {
+      // First render the 3D scene
+      this.renderer.render(this.sceneManager.currentScene);
+
+      // Then let the scene render its overlays/HUD
       this.sceneManager.currentScene.render(this.renderer);
     }
 

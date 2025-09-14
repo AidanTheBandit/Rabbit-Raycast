@@ -78,9 +78,9 @@ export class InputSystem {
     window.addEventListener('wheel', this.handleMouseWheel.bind(this));
 
     // Touch events
-    window.addEventListener('touchstart', this.handleTouchStart.bind(this));
-    window.addEventListener('touchmove', this.handleTouchMove.bind(this));
-    window.addEventListener('touchend', this.handleTouchEnd.bind(this));
+    window.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+    window.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+    window.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
 
     // Context menu
     window.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -347,14 +347,26 @@ export class InputSystem {
   }
 
   /**
-   * Get input statistics
+   * Handle touch input for mobile controls
    */
-  getStats() {
-    return {
-      activeKeys: Array.from(this.keys.entries()).filter(([_, pressed]) => pressed).length,
-      activeMouseButtons: Array.from(this.mouse.buttons.entries()).filter(([_, pressed]) => pressed).length,
-      activeTouches: this.touch.touches.size,
-      mousePosition: { x: this.mouse.x, y: this.mouse.y }
+  handleTouch(action, isStart) {
+    const keyMap = {
+      'move_forward': 'KeyW',
+      'move_backward': 'KeyS',
+      'turn_left': 'KeyA',
+      'turn_right': 'KeyD',
+      'shoot': 'Space',
+      'use': 'KeyE',
+      'strafe': 'ShiftLeft'
     };
+
+    const key = keyMap[action];
+    if (key) {
+      if (isStart) {
+        this.keys.set(key, true);
+      } else {
+        this.keys.set(key, false);
+      }
+    }
   }
 }

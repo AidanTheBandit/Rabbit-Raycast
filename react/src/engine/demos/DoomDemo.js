@@ -27,17 +27,20 @@ export class DoomDemoScene extends Scene {
       enemies: 0,
       score: 0
     };
+
+    // Initialize map data (will be set by loadLevel)
+    this.map = [];
   }
 
   async onEnter(transitionData = {}) {
     console.log('🎮 Starting Doom Demo...');
 
-    // Initialize physics world
-    this.loadLevel(this.currentLevel);
-
-    // Create player
+    // Create player first
     this.player = new Player(5, 5);
     this.addEntity(this.player);
+
+    // Initialize physics world
+    this.loadLevel(this.currentLevel);
 
     // Setup input mappings
     this.setupInputMappings();
@@ -46,6 +49,13 @@ export class DoomDemoScene extends Scene {
     this.engine.gameStateCallback = (stats) => {
       this.gameStats = { ...stats };
     };
+
+    // Set rendering properties
+    this.width = 240;
+    this.height = 320;
+    this.rayCount = 120;
+    this.fov = Math.PI / 3;
+    this.maxDepth = 20;
 
     console.log('✅ Doom Demo initialized');
   }
@@ -66,7 +76,8 @@ export class DoomDemoScene extends Scene {
   }
 
   onRender(renderer) {
-    // Render game world (handled by renderer)
+    // The renderer handles the main 3D scene rendering
+    // We just need to render HUD and overlays on top
     this.renderHUD(renderer);
     this.renderGameStateOverlays(renderer);
   }
@@ -101,6 +112,9 @@ export class DoomDemoScene extends Scene {
     const levelData = this.levelManager.getLevel(levelIndex - 1);
     if (!levelData) return;
 
+    // Store map data for renderer
+    this.map = levelData.map;
+
     // Set physics world
     this.engine.physics.setWorld({
       map: levelData.map,
@@ -129,6 +143,8 @@ export class DoomDemoScene extends Scene {
    * Update game logic
    */
   updateGameLogic(deltaTime) {
+    if (!this.player) return;
+
     // Handle player movement
     this.handlePlayerMovement(deltaTime);
 
@@ -147,6 +163,8 @@ export class DoomDemoScene extends Scene {
    * Handle player movement
    */
   handlePlayerMovement(deltaTime) {
+    if (!this.player) return;
+
     const moveSpeed = GAME_CONSTANTS.MOVE_SPEED;
     const turnSpeed = GAME_CONSTANTS.TURN_SPEED;
     const dt = deltaTime / 16.67;
@@ -195,7 +213,7 @@ export class DoomDemoScene extends Scene {
    * Handle shooting
    */
   handleShoot() {
-    if (this.player.ammo <= 0 || this.gameState !== 'playing') return;
+    if (!this.player || this.player.ammo <= 0 || this.gameState !== 'playing') return;
 
     this.player.shoot();
 
@@ -243,6 +261,8 @@ export class DoomDemoScene extends Scene {
    * Check win/lose conditions
    */
   checkGameConditions() {
+    if (!this.player) return;
+
     // Check if player is dead
     if (this.player.health <= 0) {
       this.gameState = 'gameOver';
@@ -281,7 +301,7 @@ export class DoomDemoScene extends Scene {
 
     // HUD background
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(0, 0, renderer.game.width, 40);
+    ctx.fillRect(0, 0, renderer.width, 40);
 
     // HUD text
     ctx.fillStyle = '#fff';
@@ -304,20 +324,20 @@ export class DoomDemoScene extends Scene {
 
     if (this.gameState === 'levelComplete') {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-      ctx.fillRect(0, 0, renderer.game.width, renderer.game.height);
+      ctx.fillRect(0, 0, renderer.width, renderer.height);
       ctx.fillStyle = '#fff';
       ctx.font = '24px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('LEVEL COMPLETE!', renderer.game.width / 2, renderer.game.height / 2 - 30);
-      ctx.fillText(`Level ${this.currentLevel}`, renderer.game.width / 2, renderer.game.height / 2 + 10);
+      ctx.fillText('LEVEL COMPLETE!', renderer.width / 2, renderer.height / 2 - 30);
+      ctx.fillText(`Level ${this.currentLevel}`, renderer.width / 2, renderer.height / 2 + 10);
     } else if (this.gameState === 'gameOver') {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-      ctx.fillRect(0, 0, renderer.game.width, renderer.game.height);
+      ctx.fillRect(0, 0, renderer.width, renderer.height);
       ctx.fillStyle = this.enemies.length === 0 ? '#0f0' : '#f00';
       ctx.font = '24px monospace';
       ctx.textAlign = 'center';
       const message = this.enemies.length === 0 ? 'GAME COMPLETED!' : 'GAME OVER';
-      ctx.fillText(message, renderer.game.width / 2, renderer.game.height / 2);
+      ctx.fillText(message, renderer.width / 2, renderer.height / 2);
     }
 
     ctx.restore();
