@@ -24,7 +24,6 @@ export class Renderer {
     }
 
     if (!this.ctx) {
-      console.error('Renderer: No canvas context available');
       return;
     }
 
@@ -72,12 +71,20 @@ export class Renderer {
       return;
     }
 
+    // Dynamic ray count adjustment based on performance
+    let effectiveRayCount = rayCount;
+    if (this.engine && this.engine.fps < 30) {
+      effectiveRayCount = Math.max(15, Math.floor(rayCount * 0.5)); // Reduce to 50% at low FPS
+    } else if (this.engine && this.engine.fps < 45) {
+      effectiveRayCount = Math.max(30, Math.floor(rayCount * 0.75)); // Reduce to 75% at medium FPS
+    }
+
     // Collect all renderable objects with their distances
     const renderQueue = [];
 
     // Add walls to render queue
-    for (let x = 0; x < rayCount; x++) {
-      const rayAngle = player.angle - fov / 2 + (x / rayCount) * fov;
+    for (let x = 0; x < effectiveRayCount; x++) {
+      const rayAngle = player.angle - fov / 2 + (x / effectiveRayCount) * fov;
       const distance = this.castRay(player.x, player.y, rayAngle, map, maxDepth);
 
       renderQueue.push({
@@ -129,7 +136,7 @@ export class Renderer {
     // Render in depth order
     renderQueue.forEach(item => {
       if (item.type === 'wall') {
-        this.renderWallColumn(item.x, item.distance, item.rayAngle, rayCount, maxDepth);
+        this.renderWallColumn(item.x, item.distance, item.rayAngle, effectiveRayCount, maxDepth);
       } else if (item.type === 'enemy') {
         this.renderEnemySprite(item.enemy, item.distance, item.angle, fov);
       }

@@ -384,38 +384,35 @@ export class DoomDemoScene extends Scene {
     this.engine.audio.playProceduralSound(800, 0.1, 'square', 0.3);
 
     // Find enemies in shooting range with line of sight
-    const visibleEnemies = this.enemies.filter(enemy => {
-      const dx = enemy.x - this.player.x;
-      const dy = enemy.y - this.player.y;
+    const visibleEnemies = [];
+    const playerX = this.player.x;
+    const playerY = this.player.y;
+    const playerAngle = this.player.angle;
+
+    for (const enemy of this.enemies) {
+      const dx = enemy.x - playerX;
+      const dy = enemy.y - playerY;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      // Check distance
-      if (distance > GAME_CONSTANTS.SHOOT_DISTANCE) return false;
+      // Check distance first (fastest check)
+      if (distance > GAME_CONSTANTS.SHOOT_DISTANCE) continue;
 
       // Check shooting cone (30 degrees)
       const angleToEnemy = Math.atan2(dy, dx);
-      const angleDiff = Math.abs(angleToEnemy - this.player.angle);
+      const angleDiff = Math.abs(angleToEnemy - playerAngle);
       const normalizedAngleDiff = Math.min(angleDiff, 2 * Math.PI - angleDiff);
-      if (normalizedAngleDiff > Math.PI / 6) return false;
+      if (normalizedAngleDiff > Math.PI / 6) continue;
 
-      // Check line of sight
-      return this.engine.physics.hasLineOfSight(
-        this.player.x, this.player.y,
-        enemy.x, enemy.y
-      );
-    });
+      // Check line of sight (most expensive check, do last)
+      if (this.engine.physics.hasLineOfSight(playerX, playerY, enemy.x, enemy.y)) {
+        visibleEnemies.push({ enemy, distance });
+      }
+    }
 
     // Hit closest enemy
     if (visibleEnemies.length > 0) {
-      const closestEnemy = visibleEnemies.reduce((closest, enemy) => {
-        const distClosest = Math.sqrt(
-          (closest.x - this.player.x) ** 2 + (closest.y - this.player.y) ** 2
-        );
-        const distCurrent = Math.sqrt(
-          (enemy.x - this.player.x) ** 2 + (enemy.y - this.player.y) ** 2
-        );
-        return distCurrent < distClosest ? enemy : closest;
-      });
+      visibleEnemies.sort((a, b) => a.distance - b.distance);
+      const closestEnemy = visibleEnemies[0].enemy;
 
       closestEnemy.takeDamage(GAME_CONSTANTS.SHOOT_DAMAGE);
       // Create blood particles

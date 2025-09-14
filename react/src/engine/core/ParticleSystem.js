@@ -11,6 +11,7 @@ export class ParticleSystem {
     this.particles = [];
     this.pool = [];
     this.maxParticles = 50;
+    this.activeParticles = 0; // Track active particles for quick checks
   }
 
   /**
@@ -42,6 +43,7 @@ export class ParticleSystem {
       return null; // Max particles reached
     }
 
+    this.activeParticles++;
     return particle;
   }
 
@@ -49,6 +51,8 @@ export class ParticleSystem {
    * Update particles
    */
   update(deltaTime) {
+    if (this.activeParticles === 0) return; // Early exit if no active particles
+
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const particle = this.particles[i];
 
@@ -68,7 +72,7 @@ export class ParticleSystem {
       if (particle.life <= 0) {
         particle.active = false;
         this.pool.push(particle);
-        this.particles.splice(i, 1);
+        this.activeParticles--;
       }
     }
   }
@@ -77,7 +81,7 @@ export class ParticleSystem {
    * Render particles
    */
   render(ctx) {
-    if (this.particles.length === 0) return; // Early exit if no particles
+    if (this.activeParticles === 0) return; // Early exit if no active particles
 
     ctx.save();
 
@@ -154,6 +158,7 @@ export class ParticleSystem {
       this.pool.push(particle);
     }
     this.particles = [];
+    this.activeParticles = 0;
   }
 
   /**

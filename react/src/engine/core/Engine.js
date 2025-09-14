@@ -91,9 +91,13 @@ export class Engine {
 
     const deltaTime = currentTime - this.lastTime;
 
+    // Frame rate limiting for consistent performance
     if (deltaTime >= this.frameInterval) {
-      this.deltaTime = deltaTime;
-      this.update(deltaTime);
+      // Cap delta time to prevent large jumps (e.g., when tab is inactive)
+      const cappedDeltaTime = Math.min(deltaTime, 100); // Max 100ms per frame
+
+      this.deltaTime = cappedDeltaTime;
+      this.update(cappedDeltaTime);
       this.render();
       this.lastTime = currentTime;
 
@@ -160,6 +164,8 @@ export class Engine {
    * Render debug information
    */
   renderDebugInfo() {
+    if (!this.config.debug) return; // Skip if debug is disabled
+
     const ctx = this.canvas.getContext('2d');
     ctx.save();
 
