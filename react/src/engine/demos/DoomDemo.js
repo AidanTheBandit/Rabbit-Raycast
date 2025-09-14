@@ -36,7 +36,7 @@ export class DoomDemoScene extends Scene {
     console.log('🎮 Starting Doom Demo...');
 
     // Create player first
-    this.player = new Player(5, 5);
+    this.player = new Player(8, 5);
     this.addEntity(this.player);
 
     // Initialize physics world

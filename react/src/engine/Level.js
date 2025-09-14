@@ -24,7 +24,7 @@ export class LevelManager {
         ],
         enemySpawns: [
           { x: 3, y: 3 },
-          { x: 8, y: 5 },
+          { x: 12, y: 5 },
           { x: 12, y: 8 }
         ]
       },

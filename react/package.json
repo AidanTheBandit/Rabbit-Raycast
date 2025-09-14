@@ -12,6 +12,8 @@
     "serve": "vite preview --host",
     "clean": "rm -rf dist",
     "build:prod": "npm run clean && npm run build",
+    "deploy": "vercel --prod",
+    "deploy:staging": "vercel",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
