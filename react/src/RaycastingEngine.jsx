@@ -61,13 +61,6 @@ const RaycastingEngine = () => {
                   onMouseDown={() => handleTouch('strafe', true)} onMouseUp={() => handleTouch('strafe', false)}>STRAFE</button>
         </div>
       </div>
-      <div className="hud">
-        <span>Health: {engineRef.current?.sceneManager?.currentScene?.gameStats?.health || 100}</span>
-        <span>Ammo: {engineRef.current?.sceneManager?.currentScene?.gameStats?.ammo || 50}</span>
-        <span>Level: {engineRef.current?.sceneManager?.currentScene?.gameStats?.level || 1}</span>
-        <span>Enemies: {engineRef.current?.sceneManager?.currentScene?.gameStats?.enemies || 0}</span>
-        <span>Score: {engineRef.current?.sceneManager?.currentScene?.gameStats?.score || 0}</span>
-      </div>
     </div>
   );
 };

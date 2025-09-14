@@ -53,8 +53,8 @@ export class DoomDemoScene extends Scene {
     // Set rendering properties
     this.width = 240;
     this.height = 320;
-    this.rayCount = 120;
-    this.fov = Math.PI / 3;
+    this.rayCount = 60;
+    this.fov = Math.PI / 2.5;
     this.maxDepth = 20;
 
     console.log('✅ Doom Demo initialized');
@@ -148,15 +148,8 @@ export class DoomDemoScene extends Scene {
     // Handle player movement
     this.handlePlayerMovement(deltaTime);
 
-    // Update enemies
-    this.enemies.forEach(enemy => {
-      enemy.update(deltaTime);
-    });
-
-    // Update game stats
-    this.gameStats.health = this.player.health;
-    this.gameStats.ammo = this.player.ammo;
-    this.gameStats.score = this.score;
+    // Check win/lose conditions
+    this.checkGameConditions();
   }
 
   /**

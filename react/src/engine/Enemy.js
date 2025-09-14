@@ -72,9 +72,9 @@ export class Enemy {
     const dy = this.scene.player.y - this.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Cast ray to check for walls
+    // Cast ray from enemy to player to check for walls
     const angle = Math.atan2(dy, dx);
-    const rayDistance = this.scene.engine.physics.castRay(this.scene.player.x, this.scene.player.y, angle, distance + 1);
+    const rayDistance = this.scene.engine.physics.castRay(this.x, this.y, angle, distance + 1);
 
     return rayDistance >= distance;
   }
