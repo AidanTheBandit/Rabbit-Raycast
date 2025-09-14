@@ -117,10 +117,10 @@ export class Renderer {
     const wallHeight = (this.height / 2) / distance;
     const wallTop = (this.height / 2) - wallHeight;
     const wallBottom = (this.height / 2) + wallHeight;
-    const shade = 0.6 + 0.4 * (1 - distance / maxDepth);
+    const shade = 0.7 + 0.3 * (1 - distance / maxDepth);
     const color = Math.floor(255 * shade);
 
-    this.ctx.fillStyle = `rgb(${color}, ${Math.floor(color * 0.7)}, ${Math.floor(color * 0.3)})`;
+    this.ctx.fillStyle = `rgb(${color}, ${Math.floor(color * 0.8)}, ${Math.floor(color * 0.5)})`;
     this.ctx.fillRect(
       (x / rayCount) * this.width,
       wallTop,

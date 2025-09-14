@@ -53,7 +53,7 @@ export class DoomDemoScene extends Scene {
     // Set rendering properties
     this.width = 240;
     this.height = 320;
-    this.rayCount = 60;
+    this.rayCount = 45;
     this.fov = Math.PI / 2.5;
     this.maxDepth = 20;
 
@@ -96,13 +96,6 @@ export class DoomDemoScene extends Scene {
     // Actions
     this.engine.input.keyMappings.set('shoot', ['Space']);
     this.engine.input.keyMappings.set('use', ['KeyE']);
-
-    // Input event handlers
-    this.engine.input.addEventListener('keydown', (data) => {
-      if (data.key === 'Space') {
-        this.handleShoot();
-      }
-    });
   }
 
   /**
@@ -147,6 +140,15 @@ export class DoomDemoScene extends Scene {
 
     // Handle player movement
     this.handlePlayerMovement(deltaTime);
+
+    // Handle actions
+    if (this.engine.input.isActionJustTriggered('shoot')) {
+      this.handleShoot();
+    }
+    if (this.engine.input.isActionJustTriggered('use')) {
+      // Placeholder for use action (e.g., open door, interact)
+      console.log('Use action triggered');
+    }
 
     // Check win/lose conditions
     this.checkGameConditions();
@@ -292,18 +294,29 @@ export class DoomDemoScene extends Scene {
     const ctx = renderer.ctx;
     ctx.save();
 
+    const fontSize = Math.max(12, renderer.width / 20);
+    ctx.font = `${fontSize}px monospace`;
+    const lineHeight = fontSize + 5;
+    let y = 20;
+
+    // Calculate background height
+    const bgHeight = y + lineHeight * 5 + 10;
+
     // HUD background
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(0, 0, renderer.width, 40);
+    ctx.fillRect(0, 0, renderer.width, bgHeight);
 
     // HUD text
     ctx.fillStyle = '#fff';
-    ctx.font = '16px monospace';
-    ctx.fillText(`Health: ${this.gameStats.health}`, 10, 25);
-    ctx.fillText(`Ammo: ${this.gameStats.ammo}`, 120, 25);
-    ctx.fillText(`Level: ${this.gameStats.level}`, 220, 25);
-    ctx.fillText(`Enemies: ${this.gameStats.enemies}`, 320, 25);
-    ctx.fillText(`Score: ${this.gameStats.score}`, 450, 25);
+    ctx.fillText(`Health: ${this.gameStats.health}`, 10, y);
+    y += lineHeight;
+    ctx.fillText(`Ammo: ${this.gameStats.ammo}`, 10, y);
+    y += lineHeight;
+    ctx.fillText(`Level: ${this.gameStats.level}`, 10, y);
+    y += lineHeight;
+    ctx.fillText(`Enemies: ${this.gameStats.enemies}`, 10, y);
+    y += lineHeight;
+    ctx.fillText(`Score: ${this.gameStats.score}`, 10, y);
 
     ctx.restore();
   }

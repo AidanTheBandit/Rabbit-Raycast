@@ -47,7 +47,7 @@ html, body {
   right: 2vw;
   display: flex;
   justify-content: space-between;
-  font-size: 3vw;
+  font-size: clamp(16px, 4vw, 32px);
   color: #FE5F00;
   z-index: 50;
   pointer-events: none;
@@ -57,8 +57,8 @@ html, body {
 
 .hud span {
   background-color: rgba(0, 0, 0, 0.7);
-  padding: 1vw;
-  border-radius: 0.5vw;
+  padding: clamp(4px, 1vw, 8px);
+  border-radius: clamp(2px, 0.5vw, 4px);
   border: 1px solid #FE5F00;
 }
 
@@ -84,13 +84,13 @@ html, body {
 
 .dpad button {
   position: absolute;
-  width: 8vw;
-  height: 8vw;
+  width: clamp(40px, 8vw, 80px);
+  height: clamp(40px, 8vw, 80px);
   background-color: rgba(254, 95, 0, 0.8);
   border: 1px solid #FE5F00;
   color: #fff;
-  font-size: 3vw;
-  border-radius: 1vw;
+  font-size: clamp(12px, 3vw, 24px);
+  border-radius: clamp(4px, 1vw, 8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -133,14 +133,14 @@ html, body {
 }
 
 .action-btn {
-  width: 18vw;
-  height: 8vw;
+  width: clamp(60px, 18vw, 120px);
+  height: clamp(40px, 8vw, 80px);
   background-color: rgba(254, 95, 0, 0.8);
   border: 1px solid #FE5F00;
   color: #fff;
-  font-size: 2.5vw;
+  font-size: clamp(10px, 2.5vw, 20px);
   font-weight: bold;
-  border-radius: 1vw;
+  border-radius: clamp(4px, 1vw, 8px);
   -webkit-tap-highlight-color: transparent;
   cursor: pointer;
 }
@@ -187,33 +187,33 @@ html, body {
   }
 
   .dpad {
-    width: 20vh;
-    height: 20vh;
+    width: clamp(120px, 20vh, 200px);
+    height: clamp(120px, 20vh, 200px);
   }
 
   .dpad button {
-    width: 6vh;
-    height: 6vh;
-    font-size: 2vh;
+    width: clamp(30px, 6vh, 60px);
+    height: clamp(30px, 6vh, 60px);
+    font-size: clamp(10px, 2vh, 20px);
   }
 
   .action-buttons {
     flex-direction: column;
-    gap: 2vh;
-    width: 30vw;
+    gap: clamp(8px, 2vh, 16px);
+    width: clamp(120px, 30vw, 200px);
   }
 
   .action-btn {
-    width: 25vw;
-    height: 6vh;
-    font-size: 2vh;
+    width: clamp(80px, 25vw, 150px);
+    height: clamp(30px, 6vh, 60px);
+    font-size: clamp(8px, 2vh, 16px);
   }
 
   .hud {
-    top: 2vh;
+    top: clamp(8px, 2vh, 16px);
     left: 2vw;
     right: 2vw;
-    font-size: 2vh;
+    font-size: clamp(14px, 2vh, 28px);
   }
 
   .game-canvas {

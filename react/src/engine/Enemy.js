@@ -96,6 +96,7 @@ export class Enemy {
       if (this.scene) {
         this.scene.enemies = this.scene.enemies.filter(e => e !== this);
         this.scene.score += GAME_CONSTANTS.SCORE_PER_ENEMY;
+        this.scene.player.ammo = Math.min(this.scene.player.ammo + GAME_CONSTANTS.AMMO_DROP, GAME_CONSTANTS.MAX_AMMO); // Drop ammo
 
         // Check if level is complete
         if (this.scene.enemies.length === 0) {
