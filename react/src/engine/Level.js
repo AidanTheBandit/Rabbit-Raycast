@@ -23,9 +23,9 @@ export class LevelManager {
           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ],
         enemySpawns: [
-          { x: 3, y: 3 },
-          { x: 12, y: 5 },
-          { x: 12, y: 8 }
+          { x: 3.5, y: 3.5 },
+          { x: 12.5, y: 5.5 },
+          { x: 12.5, y: 8.5 }
         ]
       },
       {
@@ -45,10 +45,10 @@ export class LevelManager {
           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ],
         enemySpawns: [
-          { x: 2, y: 2 },
-          { x: 5, y: 4 },
-          { x: 10, y: 6 },
-          { x: 13, y: 9 }
+          { x: 2.5, y: 2.5 },
+          { x: 5.5, y: 4.5 },
+          { x: 10.5, y: 6.5 },
+          { x: 13.5, y: 9.5 }
         ]
       },
       {
@@ -68,19 +68,29 @@ export class LevelManager {
           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ],
         enemySpawns: [
-          { x: 2, y: 2 },
-          { x: 4, y: 4 },
-          { x: 6, y: 6 },
-          { x: 8, y: 8 },
-          { x: 10, y: 10 },
-          { x: 12, y: 12 }
+          { x: 2.5, y: 2.5 },
+          { x: 4.5, y: 4.5 },
+          { x: 6.5, y: 6.5 },
+          { x: 8.5, y: 8.5 },
+          { x: 10.5, y: 10.5 },
+          { x: 12.5, y: 12.5 }
         ]
       }
     ];
   }
 
   getLevel(levelIndex) {
-    return this.levels[levelIndex];
+    const level = this.levels[levelIndex];
+    if (level) {
+      console.log('LevelManager: Loading level', levelIndex, level.name, {
+        mapWidth: level.map[0].length,
+        mapHeight: level.map.length,
+        enemySpawns: level.enemySpawns.length
+      });
+    } else {
+      console.error('LevelManager: Level not found at index', levelIndex);
+    }
+    return level;
   }
 
   getTotalLevels() {

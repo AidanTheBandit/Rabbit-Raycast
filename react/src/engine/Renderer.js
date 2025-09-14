@@ -7,13 +7,27 @@ export class Renderer {
     this.engine = engine;
     this.muzzleFlash = 0;
 
+    if (!this.ctx) {
+      console.error('Renderer: Failed to get 2D context from canvas');
+    }
+
     // Canvas dimensions (will be set by scene)
     this.width = canvas.width || 240;
     this.height = canvas.height || 320;
+
+    console.log('Renderer initialized', { width: this.width, height: this.height, hasContext: !!this.ctx });
   }
 
   render(scene) {
-    if (!scene) return;
+    if (!scene) {
+      console.log('Renderer: No scene provided');
+      return;
+    }
+
+    if (!this.ctx) {
+      console.error('Renderer: No canvas context available');
+      return;
+    }
 
     // Set canvas dimensions from scene if available
     if (scene.width && scene.height) {
@@ -48,9 +62,25 @@ export class Renderer {
 
   renderScene(scene) {
     // Get game data from scene
-    const { player, enemies, map, rayCount, fov, maxDepth } = scene;
+    const player = scene.player;
+    const enemies = scene.enemies;
+    const map = scene.map;
+    const rayCount = scene.rayCount;
+    const fov = scene.fov;
+    const maxDepth = scene.maxDepth;
 
-    if (!player || !map || !Array.isArray(map) || map.length === 0) return;
+    if (!player || !map || !Array.isArray(map) || map.length === 0) {
+      console.log('Renderer: Missing required scene data', { player: !!player, map: !!map, rayCount, fov, maxDepth });
+      return;
+    }
+
+    console.log('Renderer: Rendering scene', {
+      playerPos: `${player.x.toFixed(1)}, ${player.y.toFixed(1)}`,
+      playerAngle: player.angle.toFixed(2),
+      mapSize: `${map[0].length}x${map.length}`,
+      rayCount,
+      enemies: enemies.length
+    });
 
     // Collect all renderable objects with their distances
     const renderQueue = [];
@@ -102,6 +132,8 @@ export class Renderer {
 
     // Sort by distance (closest first for proper depth - render far to near)
     renderQueue.sort((a, b) => b.distance - a.distance);
+
+    console.log('Renderer: Render queue', renderQueue.length, 'items');
 
     // Render in depth order
     renderQueue.forEach(item => {

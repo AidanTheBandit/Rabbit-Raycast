@@ -37,6 +37,12 @@ html, body {
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
   display: block;
+  outline: none;
+}
+
+.game-canvas:focus {
+  outline: 2px solid #FE5F00;
+  outline-offset: -2px;
 }
 
 /* HUD Elements */
@@ -76,54 +82,12 @@ html, body {
   z-index: 60;
 }
 
-.dpad {
-  position: relative;
-  width: 25vw;
-  height: 25vw;
-}
-
-.dpad button {
-  position: absolute;
-  width: clamp(40px, 8vw, 80px);
-  height: clamp(40px, 8vw, 80px);
-  background-color: rgba(254, 95, 0, 0.8);
-  border: 1px solid #FE5F00;
-  color: #fff;
-  font-size: clamp(12px, 3vw, 24px);
-  border-radius: clamp(4px, 1vw, 8px);
+.movement-controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  -webkit-tap-highlight-color: transparent;
-  cursor: pointer;
-}
-
-.dpad button:active {
-  background-color: rgba(254, 95, 0, 1);
-}
-
-.dpad button.up {
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.dpad button.down {
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.dpad button.left {
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.dpad button.right {
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  width: 25vw;
+  height: 25vw;
 }
 
 .action-buttons {
@@ -186,15 +150,9 @@ html, body {
     padding: 2vh 2vw;
   }
 
-  .dpad {
+  .movement-controls {
     width: clamp(120px, 20vh, 200px);
     height: clamp(120px, 20vh, 200px);
-  }
-
-  .dpad button {
-    width: clamp(30px, 6vh, 60px);
-    height: clamp(30px, 6vh, 60px);
-    font-size: clamp(10px, 2vh, 20px);
   }
 
   .action-buttons {

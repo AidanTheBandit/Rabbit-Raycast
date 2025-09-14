@@ -55,7 +55,12 @@ export class SceneManager {
       this.currentScene = new sceneClass(this.engine);
       await this.currentScene.enter(transitionData);
 
-      console.log(`🎭 Scene loaded: ${name}`);
+      console.log(`🎭 Scene loaded: ${name}`, {
+        hasPlayer: !!this.currentScene.player,
+        hasMap: !!this.currentScene.map,
+        mapSize: this.currentScene.map ? `${this.currentScene.map[0]?.length}x${this.currentScene.map.length}` : 'none',
+        enemies: this.currentScene.enemies?.length || 0
+      });
       return true;
 
     } catch (error) {
@@ -130,6 +135,8 @@ export class SceneManager {
   render(renderer) {
     if (this.currentScene && !this.isTransitioning) {
       this.currentScene.render(renderer);
+    } else {
+      console.log('SceneManager: No current scene to render or transitioning', { hasScene: !!this.currentScene, isTransitioning: this.isTransitioning });
     }
   }
 
@@ -205,7 +212,10 @@ export class Scene {
    * Render scene
    */
   render(renderer) {
-    if (!this.isActive) return;
+    if (!this.isActive) {
+      console.log('Scene: Not active, skipping render');
+      return;
+    }
 
     // Render entities
     for (const entity of this.entities) {

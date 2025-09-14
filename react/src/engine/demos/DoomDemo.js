@@ -30,14 +30,18 @@ export class DoomDemoScene extends Scene {
 
     // Initialize map data (will be set by loadLevel)
     this.map = [];
+    this.joystickMovement = { x: 0, y: 0, magnitude: 0 };
+    this.shootCooldown = 0;
   }
 
   async onEnter(transitionData = {}) {
     console.log('🎮 Starting Doom Demo...');
 
     // Create player first
-    this.player = new Player(8, 5);
+    this.player = new Player(8.5, 5.5);
     this.addEntity(this.player);
+
+    console.log('DoomDemo: Player created at', this.player.x, this.player.y);
 
     // Initialize physics world
     this.loadLevel(this.currentLevel);
@@ -57,7 +61,13 @@ export class DoomDemoScene extends Scene {
     this.fov = Math.PI / 2.5;
     this.maxDepth = 20;
 
-    console.log('✅ Doom Demo initialized');
+    console.log('✅ Doom Demo initialized', {
+      player: !!this.player,
+      map: !!this.map,
+      enemies: this.enemies.length,
+      dimensions: `${this.width}x${this.height}`,
+      playerPos: `${this.player.x}, ${this.player.y}`
+    });
   }
 
   async onExit() {
@@ -80,6 +90,12 @@ export class DoomDemoScene extends Scene {
     // We just need to render HUD and overlays on top
     this.renderHUD(renderer);
     this.renderGameStateOverlays(renderer);
+    console.log('DoomDemo: onRender called', {
+      gameState: this.gameState,
+      hasPlayer: !!this.player,
+      playerHealth: this.player?.health,
+      enemies: this.enemies.length
+    });
   }
 
   /**
@@ -96,6 +112,8 @@ export class DoomDemoScene extends Scene {
     // Actions
     this.engine.input.keyMappings.set('shoot', ['Space']);
     this.engine.input.keyMappings.set('use', ['KeyE']);
+
+    console.log('DoomDemo: Input mappings set up');
   }
 
   /**
@@ -103,7 +121,16 @@ export class DoomDemoScene extends Scene {
    */
   loadLevel(levelIndex) {
     const levelData = this.levelManager.getLevel(levelIndex - 1);
-    if (!levelData) return;
+    if (!levelData) {
+      console.error('DoomDemo: No level data found for index', levelIndex - 1);
+      return;
+    }
+
+    console.log('DoomDemo: Loading level data', levelData.name, {
+      mapWidth: levelData.map[0].length,
+      mapHeight: levelData.map.length,
+      enemySpawns: levelData.enemySpawns.length
+    });
 
     // Store map data for renderer
     this.map = levelData.map;
@@ -113,6 +140,18 @@ export class DoomDemoScene extends Scene {
       map: levelData.map,
       width: levelData.map[0].length,
       height: levelData.map.length
+    });
+
+    // Check if player position is valid
+    const playerX = Math.floor(this.player.x);
+    const playerY = Math.floor(this.player.y);
+    const isValidPosition = this.engine.physics.isValidPosition(this.player.x, this.player.y);
+
+    console.log('DoomDemo: Player position check', {
+      playerPos: `${this.player.x}, ${this.player.y}`,
+      mapPos: `${playerX}, ${playerY}`,
+      mapValue: this.map[playerY] ? this.map[playerY][playerX] : 'undefined',
+      isValid: isValidPosition
     });
 
     // Clear existing enemies
@@ -129,7 +168,12 @@ export class DoomDemoScene extends Scene {
     this.gameStats.enemies = this.enemies.length;
     this.gameStats.level = levelIndex;
 
-    console.log(`📍 Loaded level: ${levelData.name}`);
+    console.log(`📍 Loaded level: ${levelData.name}`, {
+      mapSize: `${levelData.map[0].length}x${levelData.map.length}`,
+      enemies: this.enemies.length,
+      playerPos: `${this.player.x}, ${this.player.y}`,
+      playerValid: isValidPosition
+    });
   }
 
   /**
@@ -138,14 +182,20 @@ export class DoomDemoScene extends Scene {
   updateGameLogic(deltaTime) {
     if (!this.player) return;
 
+    // Update cooldowns
+    if (this.shootCooldown > 0) {
+      this.shootCooldown -= deltaTime;
+    }
+
     // Handle player movement
     this.handlePlayerMovement(deltaTime);
 
     // Handle actions
-    if (this.engine.input.isActionJustTriggered('shoot')) {
+    if (this.engine.input.isActionActive('shoot') && this.shootCooldown <= 0) {
       this.handleShoot();
+      this.shootCooldown = 200; // 200ms cooldown between shots
     }
-    if (this.engine.input.isActionJustTriggered('use')) {
+    if (this.engine.input.isActionActive('use')) {
       // Placeholder for use action (e.g., open door, interact)
       console.log('Use action triggered');
     }
@@ -164,43 +214,73 @@ export class DoomDemoScene extends Scene {
     const turnSpeed = GAME_CONSTANTS.TURN_SPEED;
     const dt = deltaTime / 16.67;
 
-    // Movement
-    if (this.engine.input.isActionActive('move_forward')) {
-      const newX = this.player.x + Math.cos(this.player.angle) * moveSpeed * dt;
-      const newY = this.player.y + Math.sin(this.player.angle) * moveSpeed * dt;
-      if (this.engine.physics.isValidPosition(newX, newY)) {
-        this.player.x = newX;
-        this.player.y = newY;
+    // Use joystick movement if available and significant
+    if (this.joystickMovement.magnitude > 0.1) {
+      // Joystick provides analog movement in x/y directions
+      // x: left/right strafe, y: forward/backward
+      const strafeAmount = this.joystickMovement.x * moveSpeed * dt;
+      const forwardAmount = -this.joystickMovement.y * moveSpeed * dt; // Negative because y is inverted in joystick
+
+      // Handle forward/backward movement
+      if (Math.abs(forwardAmount) > 0.01) {
+        const newX = this.player.x + Math.cos(this.player.angle) * forwardAmount;
+        const newY = this.player.y + Math.sin(this.player.angle) * forwardAmount;
+        if (this.engine.physics.isValidPosition(newX, newY)) {
+          this.player.x = newX;
+          this.player.y = newY;
+        }
+      }
+
+      // Handle strafing
+      if (Math.abs(strafeAmount) > 0.01) {
+        const strafeAngle = this.player.angle + Math.PI / 2;
+        const newX = this.player.x + Math.cos(strafeAngle) * strafeAmount;
+        const newY = this.player.y + Math.sin(strafeAngle) * strafeAmount;
+        if (this.engine.physics.isValidPosition(newX, newY)) {
+          this.player.x = newX;
+          this.player.y = newY;
+        }
+      }
+    } else {
+      // Fallback to digital keyboard input
+      // Movement
+      if (this.engine.input.isActionActive('move_forward')) {
+        const newX = this.player.x + Math.cos(this.player.angle) * moveSpeed * dt;
+        const newY = this.player.y + Math.sin(this.player.angle) * moveSpeed * dt;
+        if (this.engine.physics.isValidPosition(newX, newY)) {
+          this.player.x = newX;
+          this.player.y = newY;
+        }
+      }
+
+      if (this.engine.input.isActionActive('move_backward')) {
+        const newX = this.player.x - Math.cos(this.player.angle) * moveSpeed * dt;
+        const newY = this.player.y - Math.sin(this.player.angle) * moveSpeed * dt;
+        if (this.engine.physics.isValidPosition(newX, newY)) {
+          this.player.x = newX;
+          this.player.y = newY;
+        }
+      }
+
+      // Strafing
+      if (this.engine.input.isActionActive('strafe')) {
+        const strafeAngle = this.player.angle + Math.PI / 2;
+        const newX = this.player.x + Math.cos(strafeAngle) * moveSpeed * dt;
+        const newY = this.player.y + Math.sin(strafeAngle) * moveSpeed * dt;
+        if (this.engine.physics.isValidPosition(newX, newY)) {
+          this.player.x = newX;
+          this.player.y = newY;
+        }
       }
     }
 
-    if (this.engine.input.isActionActive('move_backward')) {
-      const newX = this.player.x - Math.cos(this.player.angle) * moveSpeed * dt;
-      const newY = this.player.y - Math.sin(this.player.angle) * moveSpeed * dt;
-      if (this.engine.physics.isValidPosition(newX, newY)) {
-        this.player.x = newX;
-        this.player.y = newY;
-      }
-    }
-
-    // Turning
+    // Turning (always use digital input for precision)
     if (this.engine.input.isActionActive('turn_left')) {
       this.player.angle -= turnSpeed * dt;
     }
 
     if (this.engine.input.isActionActive('turn_right')) {
       this.player.angle += turnSpeed * dt;
-    }
-
-    // Strafing
-    if (this.engine.input.isActionActive('strafe')) {
-      const strafeAngle = this.player.angle + Math.PI / 2;
-      const newX = this.player.x + Math.cos(strafeAngle) * moveSpeed * dt;
-      const newY = this.player.y + Math.sin(strafeAngle) * moveSpeed * dt;
-      if (this.engine.physics.isValidPosition(newX, newY)) {
-        this.player.x = newX;
-        this.player.y = newY;
-      }
     }
   }
 

@@ -1,0 +1,38 @@
+.virtual-joystick {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(254, 95, 0, 0.3);
+  border: 2px solid #FE5F00;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.joystick-base {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.joystick-stick {
+  position: absolute;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background-color: rgba(254, 95, 0, 0.8);
+  border: 2px solid #FE5F00;
+  transition: none;
+  cursor: grab;
+}
+
+.joystick-stick:active {
+  cursor: grabbing;
+  background-color: rgba(254, 95, 0, 1);
+}

@@ -65,7 +65,12 @@ export class Engine {
     this.lastTime = performance.now();
     this.gameLoop(this.lastTime);
 
-    console.log('▶️ Engine started');
+    console.log('▶️ Engine started', {
+      targetFPS: this.config.targetFPS,
+      hasRenderer: !!this.renderer,
+      hasScene: !!this.sceneManager.currentScene,
+      canvasSize: `${this.canvas.width}x${this.canvas.height}`
+    });
   }
 
   /**
@@ -141,6 +146,8 @@ export class Engine {
 
       // Then let the scene render its overlays/HUD
       this.sceneManager.currentScene.render(this.renderer);
+    } else {
+      console.log('Engine: No current scene to render');
     }
 
     // Render debug info if enabled
