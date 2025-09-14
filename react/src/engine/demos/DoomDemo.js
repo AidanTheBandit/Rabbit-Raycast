@@ -212,6 +212,16 @@ export class DoomDemoScene extends Scene {
 
     this.player.shoot();
 
+    // Create muzzle flash particles
+    this.engine.particles.createMuzzleFlash(
+      this.player.x + Math.cos(this.player.angle) * 0.5,
+      this.player.y + Math.sin(this.player.angle) * 0.5,
+      this.player.angle
+    );
+
+    // Play shooting sound
+    this.engine.audio.playProceduralSound(800, 0.1, 'square', 0.3);
+
     // Find enemies in shooting range with line of sight
     const visibleEnemies = this.enemies.filter(enemy => {
       const dx = enemy.x - this.player.x;
@@ -247,6 +257,10 @@ export class DoomDemoScene extends Scene {
       });
 
       closestEnemy.takeDamage(GAME_CONSTANTS.SHOOT_DAMAGE);
+      // Create blood particles
+      this.engine.particles.createBloodSplatter(closestEnemy.x, closestEnemy.y);
+      // Play hit sound
+      this.engine.audio.playProceduralSound(200, 0.05, 'sawtooth', 0.2);
     }
 
     this.gameStats.ammo = this.player.ammo;

@@ -31,6 +31,8 @@ This React version of Rabbit-Raycast brings the classic 3D raycasting technology
 - **Player Movement** - WASD/Arrow keys + touch controls
 - **Collision Detection** - Wall collision and boundary checking
 - **Dynamic Lighting** - Distance-based shading
+- **Audio System** - Procedural sound generation with Web Audio API
+- **Particle Effects** - Muzzle flash and blood splatter effects
 - **Muzzle Flash** - Shooting effects with visual feedback
 
 ### Hardware Integration
@@ -39,7 +41,18 @@ This React version of Rabbit-Raycast brings the classic 3D raycasting technology
 - **Orientation Detection** - Auto-adjusts for screen orientation
 - **Hardware Events** - Scroll wheel and side button support
 
-## 🚀 Quick Start
+### Performance Features
+- **Hyper-Optimized** - Designed for low-end embedded browsers
+- **60 FPS Target** - Smooth gameplay on resource-constrained devices
+- **Memory Efficient** - Object pooling and minimal allocations
+- **Canvas 2D Rendering** - No external dependencies
+- **Procedural Audio** - No audio file loading required
+
+## � Documentation
+
+For detailed engine documentation, see [ENGINE.md](docs/ENGINE.md).
+
+## �🚀 Quick Start
 
 ### Prerequisites
 - **Node.js**: Version 16.0 or higher

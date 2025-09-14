@@ -18,6 +18,8 @@ import { PhysicsSystem } from './PhysicsSystem.js';
 import { InputSystem } from './InputSystem.js';
 import { SceneManager } from './SceneManager.js';
 import { AssetManager } from './AssetManager.js';
+import { AudioSystem } from './AudioSystem.js';
+import { ParticleSystem } from './ParticleSystem.js';
 
 export class Engine {
   constructor(canvas, config = {}) {
@@ -36,6 +38,8 @@ export class Engine {
     this.input = new InputSystem(this);
     this.sceneManager = new SceneManager(this);
     this.assetManager = new AssetManager(this);
+    this.audio = new AudioSystem(this);
+    this.particles = new ParticleSystem(this);
 
     // Engine state
     this.isRunning = false;
@@ -70,6 +74,7 @@ export class Engine {
   stop() {
     this.isRunning = false;
     this.input.cleanup();
+    this.audio.cleanup();
     console.log('⏹️ Engine stopped');
   }
 
@@ -111,6 +116,9 @@ export class Engine {
       this.physics.update(deltaTime);
     }
 
+    // Update particle system
+    this.particles.update(deltaTime);
+
     // Update current scene
     if (this.sceneManager.currentScene) {
       this.sceneManager.currentScene.update(deltaTime);
@@ -127,6 +135,9 @@ export class Engine {
     if (this.sceneManager.currentScene) {
       // First render the 3D scene
       this.renderer.render(this.sceneManager.currentScene);
+
+      // Render particles
+      this.particles.render(this.renderer.ctx);
 
       // Then let the scene render its overlays/HUD
       this.sceneManager.currentScene.render(this.renderer);
@@ -189,7 +200,9 @@ export class Engine {
       isRunning: this.isRunning,
       currentScene: this.sceneManager.currentScene?.name,
       physicsEnabled: this.config.enablePhysics,
-      debugEnabled: this.config.debug
+      debugEnabled: this.config.debug,
+      audioEnabled: this.audio.enabled,
+      particleCount: this.particles.getParticleCount()
     };
   }
 
