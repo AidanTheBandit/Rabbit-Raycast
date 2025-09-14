@@ -136,33 +136,43 @@ export class GameEngine {
     if (this.player.shoot() && this.gameState === 'playing') {
       this.renderer.triggerMuzzleFlash();
 
-      // Check for enemy hits
+      // Check for enemy hits with proper line-of-sight
       const shootAngle = this.player.angle;
       const maxShootDistance = GAME_CONSTANTS.SHOOT_DISTANCE;
 
-      for (let distance = 0; distance < maxShootDistance; distance += 0.1) {
-        const hitX = this.player.x + Math.cos(shootAngle) * distance;
-        const hitY = this.player.y + Math.sin(shootAngle) * distance;
+      // Find all enemies in shooting range and check line of sight
+      const visibleEnemies = this.enemies.filter(enemy => {
+        const dx = enemy.x - this.player.x;
+        const dy = enemy.y - this.player.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // Check if we hit a wall
-        const mapX = Math.floor(hitX);
-        const mapY = Math.floor(hitY);
-        if (mapX < 0 || mapX >= this.mapWidth || mapY < 0 || mapY >= this.mapHeight ||
-            this.map[mapY][mapX] === 1) {
-          break; // Hit a wall
-        }
+        // Check if enemy is within shooting distance
+        if (distance > maxShootDistance) return false;
 
-        // Check if we hit an enemy
-        for (let enemy of this.enemies) {
-          const dx = hitX - enemy.x;
-          const dy = hitY - enemy.y;
-          const enemyDistance = Math.sqrt(dx * dx + dy * dy);
+        // Check if enemy is in front (within reasonable angle)
+        const angleToEnemy = Math.atan2(dy, dx);
+        const angleDiff = Math.abs(angleToEnemy - shootAngle);
+        const normalizedAngleDiff = Math.min(angleDiff, 2 * Math.PI - angleDiff);
+        if (normalizedAngleDiff > Math.PI / 6) return false; // 30 degree cone
 
-          if (enemyDistance < 0.5) { // Hit an enemy
-            enemy.takeDamage(GAME_CONSTANTS.SHOOT_DAMAGE);
-            return;
-          }
-        }
+        // Check line of sight - cast ray to enemy position
+        const rayDistance = this.castRay(angleToEnemy);
+        return rayDistance >= distance;
+      });
+
+      // Hit the closest visible enemy
+      if (visibleEnemies.length > 0) {
+        const closestEnemy = visibleEnemies.reduce((closest, enemy) => {
+          const distClosest = Math.sqrt(
+            (closest.x - this.player.x) ** 2 + (closest.y - this.player.y) ** 2
+          );
+          const distCurrent = Math.sqrt(
+            (enemy.x - this.player.x) ** 2 + (enemy.y - this.player.y) ** 2
+          );
+          return distCurrent < distClosest ? enemy : closest;
+        });
+
+        closestEnemy.takeDamage(GAME_CONSTANTS.SHOOT_DAMAGE);
       }
     }
   }
