@@ -29,6 +29,16 @@ export class Renderer {
       return;
     }
 
+    console.log('Renderer: Rendering scene', {
+      sceneName: scene.name,
+      hasPlayer: !!scene.player,
+      hasMap: !!scene.map,
+      hasEnemies: !!scene.enemies,
+      playerPos: scene.player ? `${scene.player.x.toFixed(1)}, ${scene.player.y.toFixed(1)}` : 'none',
+      mapSize: scene.map ? `${scene.map[0]?.length}x${scene.map.length}` : 'none',
+      enemiesCount: scene.enemies ? scene.enemies.length : 0
+    });
+
     // Set canvas dimensions from scene if available
     if (scene.width && scene.height) {
       this.width = scene.width;

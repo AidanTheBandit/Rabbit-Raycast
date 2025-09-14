@@ -350,6 +350,8 @@ export class InputSystem {
    * Handle touch input for mobile controls
    */
   handleTouch(action, isStart) {
+    console.log('InputSystem: handleTouch called', action, isStart);
+
     const keyMap = {
       'move_forward': 'KeyW',
       'move_backward': 'KeyS',
@@ -362,6 +364,7 @@ export class InputSystem {
 
     const key = keyMap[action];
     if (key) {
+      console.log('InputSystem: Setting key', key, 'to', isStart);
       if (isStart) {
         this.keys.set(key, true);
       } else {

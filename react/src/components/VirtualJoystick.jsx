@@ -39,6 +39,7 @@ const VirtualJoystick = ({ onMove, size = 120 }) => {
   };
 
   const handleStart = (clientX, clientY) => {
+    console.log('VirtualJoystick: handleStart called', clientX, clientY);
     setIsDragging(true);
     const newPosition = calculateStickPosition(clientX, clientY);
     setStickPosition(newPosition);
@@ -63,14 +64,16 @@ const VirtualJoystick = ({ onMove, size = 120 }) => {
     const normalizedX = position.x / maxDistance;
     const normalizedY = position.y / maxDistance;
 
-    console.log('VirtualJoystick: sending movement', { x: normalizedX, y: normalizedY, magnitude: Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY) });
+    const movement = {
+      x: normalizedX,
+      y: normalizedY,
+      magnitude: Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY)
+    };
+
+    console.log('VirtualJoystick: sending movement', movement);
 
     if (onMove) {
-      onMove({
-        x: normalizedX,
-        y: normalizedY,
-        magnitude: Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY)
-      });
+      onMove(movement);
     }
   };
 

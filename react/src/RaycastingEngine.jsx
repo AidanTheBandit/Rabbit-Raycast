@@ -25,10 +25,13 @@ const RaycastingEngine = () => {
 
         // Register and load the Doom demo scene
         engineRef.current.sceneManager.registerScene('DoomDemo', DoomDemoScene);
+        console.log('RaycastingEngine: Scene registered, loading...');
         await engineRef.current.sceneManager.loadScene('DoomDemo');
+        console.log('RaycastingEngine: Scene loaded successfully');
 
         // Start the engine
         engineRef.current.start();
+        console.log('RaycastingEngine: Engine started');
 
         // Hide loading screen
         setIsLoading(false);

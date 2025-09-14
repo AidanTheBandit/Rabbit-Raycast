@@ -77,6 +77,7 @@ export class ParticleSystem {
    * Render particles
    */
   render(ctx) {
+    console.log('ParticleSystem: Rendering', this.particles.length, 'particles');
     ctx.save();
 
     for (const particle of this.particles) {
@@ -101,6 +102,7 @@ export class ParticleSystem {
    * Create muzzle flash effect
    */
   createMuzzleFlash(x, y, angle) {
+    console.log('ParticleSystem: Creating muzzle flash at', x, y, 'angle:', angle);
     const numParticles = 8;
 
     for (let i = 0; i < numParticles; i++) {
@@ -109,7 +111,7 @@ export class ParticleSystem {
       const vx = Math.cos(angle + spread) * speed;
       const vy = Math.sin(angle + spread) * speed;
 
-      this.createParticle(x, y, {
+      const particle = this.createParticle(x, y, {
         vx, vy,
         life: 15 + Math.random() * 10,
         size: 1 + Math.random() * 2,
@@ -117,7 +119,13 @@ export class ParticleSystem {
         gravity: 0.1,
         fade: true
       });
+
+      if (particle) {
+        console.log('ParticleSystem: Created muzzle flash particle', i + 1, '/', numParticles);
+      }
     }
+
+    console.log('ParticleSystem: Muzzle flash created with', this.particles.length, 'total particles');
   }
 
   /**

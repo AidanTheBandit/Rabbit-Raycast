@@ -80,13 +80,10 @@ export class LevelManager {
   }
 
   getLevel(levelIndex) {
+    console.log('LevelManager: Getting level at index', levelIndex, 'from', this.levels.length, 'levels');
     const level = this.levels[levelIndex];
     if (level) {
-      console.log('LevelManager: Loading level', levelIndex, level.name, {
-        mapWidth: level.map[0].length,
-        mapHeight: level.map.length,
-        enemySpawns: level.enemySpawns.length
-      });
+      console.log('LevelManager: Found level', level.name);
     } else {
       console.error('LevelManager: Level not found at index', levelIndex);
     }

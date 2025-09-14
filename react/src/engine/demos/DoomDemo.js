@@ -32,6 +32,8 @@ export class DoomDemoScene extends Scene {
     this.map = [];
     this.joystickMovement = { x: 0, y: 0, magnitude: 0 };
     this.shootCooldown = 0;
+
+    console.log('DoomDemoScene: Constructor called, levelManager created:', !!this.levelManager);
   }
 
   async onEnter(transitionData = {}) {
@@ -66,7 +68,8 @@ export class DoomDemoScene extends Scene {
       map: !!this.map,
       enemies: this.enemies.length,
       dimensions: `${this.width}x${this.height}`,
-      playerPos: `${this.player.x}, ${this.player.y}`
+      playerPos: `${this.player.x}, ${this.player.y}`,
+      isActive: this.isActive
     });
   }
 
@@ -180,7 +183,10 @@ export class DoomDemoScene extends Scene {
    * Update game logic
    */
   updateGameLogic(deltaTime) {
-    if (!this.player) return;
+    if (!this.player) {
+      console.log('DoomDemo: No player in updateGameLogic');
+      return;
+    }
 
     // Update cooldowns
     if (this.shootCooldown > 0) {
@@ -191,7 +197,11 @@ export class DoomDemoScene extends Scene {
     this.handlePlayerMovement(deltaTime);
 
     // Handle actions
-    if (this.engine.input.isActionActive('shoot') && this.shootCooldown <= 0) {
+    const shootActive = this.engine.input.isActionActive('shoot');
+    console.log('DoomDemo: Shoot action active?', shootActive, 'cooldown:', this.shootCooldown);
+
+    if (shootActive && this.shootCooldown <= 0) {
+      console.log('DoomDemo: Triggering shoot');
       this.handleShoot();
       this.shootCooldown = 200; // 200ms cooldown between shots
     }
@@ -216,18 +226,26 @@ export class DoomDemoScene extends Scene {
 
     // Use joystick movement if available and significant
     if (this.joystickMovement.magnitude > 0.1) {
+      console.log('DoomDemo: Using joystick movement', this.joystickMovement);
+
       // Joystick provides analog movement in x/y directions
       // x: left/right strafe, y: forward/backward
       const strafeAmount = this.joystickMovement.x * moveSpeed * dt;
       const forwardAmount = -this.joystickMovement.y * moveSpeed * dt; // Negative because y is inverted in joystick
 
+      console.log('DoomDemo: Movement amounts', { strafeAmount, forwardAmount });
+
       // Handle forward/backward movement
       if (Math.abs(forwardAmount) > 0.01) {
         const newX = this.player.x + Math.cos(this.player.angle) * forwardAmount;
         const newY = this.player.y + Math.sin(this.player.angle) * forwardAmount;
+        console.log('DoomDemo: Moving forward/backward', { oldX: this.player.x, oldY: this.player.y, newX, newY });
         if (this.engine.physics.isValidPosition(newX, newY)) {
           this.player.x = newX;
           this.player.y = newY;
+          console.log('DoomDemo: Player moved to', this.player.x, this.player.y);
+        } else {
+          console.log('DoomDemo: Invalid position, movement blocked');
         }
       }
 
@@ -236,9 +254,13 @@ export class DoomDemoScene extends Scene {
         const strafeAngle = this.player.angle + Math.PI / 2;
         const newX = this.player.x + Math.cos(strafeAngle) * strafeAmount;
         const newY = this.player.y + Math.sin(strafeAngle) * strafeAmount;
+        console.log('DoomDemo: Strafing', { oldX: this.player.x, oldY: this.player.y, newX, newY });
         if (this.engine.physics.isValidPosition(newX, newY)) {
           this.player.x = newX;
           this.player.y = newY;
+          console.log('DoomDemo: Player strafed to', this.player.x, this.player.y);
+        } else {
+          console.log('DoomDemo: Invalid strafe position, movement blocked');
         }
       }
     } else {
@@ -288,11 +310,23 @@ export class DoomDemoScene extends Scene {
    * Handle shooting
    */
   handleShoot() {
-    if (!this.player || this.player.ammo <= 0 || this.gameState !== 'playing') return;
+    console.log('DoomDemo: handleShoot called', {
+      hasPlayer: !!this.player,
+      ammo: this.player?.ammo,
+      gameState: this.gameState
+    });
+
+    if (!this.player || this.player.ammo <= 0 || this.gameState !== 'playing') {
+      console.log('DoomDemo: Cannot shoot - conditions not met');
+      return;
+    }
+
+    console.log('DoomDemo: Shooting!');
 
     this.player.shoot();
 
     // Create muzzle flash particles
+    console.log('DoomDemo: Creating muzzle flash at', this.player.x + Math.cos(this.player.angle) * 0.5, this.player.y + Math.sin(this.player.angle) * 0.5);
     this.engine.particles.createMuzzleFlash(
       this.player.x + Math.cos(this.player.angle) * 0.5,
       this.player.y + Math.sin(this.player.angle) * 0.5,
@@ -324,6 +358,8 @@ export class DoomDemoScene extends Scene {
       );
     });
 
+    console.log('DoomDemo: Found', visibleEnemies.length, 'visible enemies');
+
     // Hit closest enemy
     if (visibleEnemies.length > 0) {
       const closestEnemy = visibleEnemies.reduce((closest, enemy) => {
@@ -336,6 +372,7 @@ export class DoomDemoScene extends Scene {
         return distCurrent < distClosest ? enemy : closest;
       });
 
+      console.log('DoomDemo: Hitting enemy at', closestEnemy.x, closestEnemy.y);
       closestEnemy.takeDamage(GAME_CONSTANTS.SHOOT_DAMAGE);
       // Create blood particles
       this.engine.particles.createBloodSplatter(closestEnemy.x, closestEnemy.y);
