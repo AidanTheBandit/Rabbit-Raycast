@@ -253,7 +253,15 @@ export class DoomDemoScene extends Scene {
           this.player.y = newY;
           console.log('DoomDemo: Player moved to', this.player.x, this.player.y);
         } else {
-          console.log('DoomDemo: Invalid position, movement blocked');
+          // Try to find a nearby valid position to prevent getting stuck
+          const validPos = this.engine.physics.findNearestValidPosition(newX, newY, 0.5);
+          if (validPos.x !== newX || validPos.y !== newY) {
+            this.player.x = validPos.x;
+            this.player.y = validPos.y;
+            console.log('DoomDemo: Player nudged to valid position', validPos);
+          } else {
+            console.log('DoomDemo: Invalid position, movement blocked');
+          }
         }
       }
 
@@ -268,7 +276,15 @@ export class DoomDemoScene extends Scene {
           this.player.y = newY;
           console.log('DoomDemo: Player strafed to', this.player.x, this.player.y);
         } else {
-          console.log('DoomDemo: Invalid strafe position, movement blocked');
+          // Try to find a nearby valid position to prevent getting stuck
+          const validPos = this.engine.physics.findNearestValidPosition(newX, newY, 0.5);
+          if (validPos.x !== newX || validPos.y !== newY) {
+            this.player.x = validPos.x;
+            this.player.y = validPos.y;
+            console.log('DoomDemo: Player nudged to valid position', validPos);
+          } else {
+            console.log('DoomDemo: Invalid strafe position, movement blocked');
+          }
         }
       }
     } else {
@@ -280,6 +296,12 @@ export class DoomDemoScene extends Scene {
         if (this.engine.physics.isValidPosition(newX, newY)) {
           this.player.x = newX;
           this.player.y = newY;
+        } else {
+          const validPos = this.engine.physics.findNearestValidPosition(newX, newY, 0.3);
+          if (validPos.x !== newX || validPos.y !== newY) {
+            this.player.x = validPos.x;
+            this.player.y = validPos.y;
+          }
         }
       }
 
@@ -289,6 +311,12 @@ export class DoomDemoScene extends Scene {
         if (this.engine.physics.isValidPosition(newX, newY)) {
           this.player.x = newX;
           this.player.y = newY;
+        } else {
+          const validPos = this.engine.physics.findNearestValidPosition(newX, newY, 0.3);
+          if (validPos.x !== newX || validPos.y !== newY) {
+            this.player.x = validPos.x;
+            this.player.y = validPos.y;
+          }
         }
       }
 
@@ -300,6 +328,12 @@ export class DoomDemoScene extends Scene {
         if (this.engine.physics.isValidPosition(newX, newY)) {
           this.player.x = newX;
           this.player.y = newY;
+        } else {
+          const validPos = this.engine.physics.findNearestValidPosition(newX, newY, 0.3);
+          if (validPos.x !== newX || validPos.y !== newY) {
+            this.player.x = validPos.x;
+            this.player.y = validPos.y;
+          }
         }
       }
     }

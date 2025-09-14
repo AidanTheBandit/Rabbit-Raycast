@@ -36,7 +36,7 @@ export class PhysicsSystem {
   /**
    * Check if a position is valid (not colliding with walls)
    */
-  isValidPosition(x, y, radius = 0.3) {
+  isValidPosition(x, y, radius = 0.2) {
     if (!this.world) return true;
 
     const mapX = Math.floor(x);
@@ -47,21 +47,23 @@ export class PhysicsSystem {
       return false;
     }
 
-    // Check wall collision
+    // Check wall collision at center
     if (this.world.map[mapY][mapX] === 1) {
       return false;
     }
 
     // Check radius-based collision for smoother movement
     if (radius > 0) {
-      const corners = [
-        [x - radius, y - radius],
-        [x + radius, y - radius],
-        [x - radius, y + radius],
-        [x + radius, y + radius]
+      // Use fewer corner checks and smaller radius for less strict collision
+      const checkPoints = [
+        [x, y], // Center
+        [x - radius * 0.7, y], // Left
+        [x + radius * 0.7, y], // Right
+        [x, y - radius * 0.7], // Top
+        [x, y + radius * 0.7]  // Bottom
       ];
 
-      for (const [cx, cy] of corners) {
+      for (const [cx, cy] of checkPoints) {
         const cMapX = Math.floor(cx);
         const cMapY = Math.floor(cy);
 
@@ -158,13 +160,29 @@ export class PhysicsSystem {
   }
 
   /**
-   * Check collision between point and bounding box
+   * Find nearest valid position to help player get unstuck
    */
-  checkPointBoxCollision(pointX, pointY, box) {
-    return pointX >= box.x &&
-           pointX <= box.x + box.width &&
-           pointY >= box.y &&
-           pointY <= box.y + box.height;
+  findNearestValidPosition(x, y, maxSearchDistance = 1.0, stepSize = 0.1) {
+    if (this.isValidPosition(x, y)) {
+      return { x, y };
+    }
+
+    // Search in expanding circles around the position
+    for (let distance = stepSize; distance <= maxSearchDistance; distance += stepSize) {
+      const steps = Math.ceil(distance / stepSize);
+      for (let i = 0; i < steps; i++) {
+        const angle = (i / steps) * Math.PI * 2;
+        const testX = x + Math.cos(angle) * distance;
+        const testY = y + Math.sin(angle) * distance;
+
+        if (this.isValidPosition(testX, testY)) {
+          return { x: testX, y: testY };
+        }
+      }
+    }
+
+    // If no valid position found, return original position
+    return { x, y };
   }
 
   /**

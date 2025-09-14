@@ -82,11 +82,19 @@ export class Enemy {
   attackPlayer() {
     if (!this.scene || !this.scene.player) return;
 
+    // Check line of sight before attacking
+    if (!this.hasLineOfSight()) {
+      console.log('Enemy: No line of sight, cannot attack');
+      return;
+    }
+
     // Deal damage to player
     this.scene.player.takeDamage(GAME_CONSTANTS.ENEMY_ATTACK_DAMAGE);
     if (!this.scene.player.isAlive()) {
       this.scene.gameState = 'gameOver';
     }
+
+    console.log('Enemy: Attacked player for', GAME_CONSTANTS.ENEMY_ATTACK_DAMAGE, 'damage');
   }
 
   takeDamage(damage) {
