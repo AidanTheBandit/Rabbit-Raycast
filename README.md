@@ -5,6 +5,7 @@ A complete JavaScript implementation of a Doom-like 3D raycasting engine, optimi
 ![Rabbit-Raycast Demo](https://img.shields.io/badge/Demo-Raycasting-blue)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow)
 ![License](https://img.shields.io/badge/License-MIT-green)
+![Send a donation if you like my work!](https://cash.app/$AidanTheBandit) 
 
 ## 🎮 Overview
 
