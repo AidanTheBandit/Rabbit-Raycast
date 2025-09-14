@@ -75,6 +75,8 @@ html, body {
   left: 0;
   right: 0;
   height: 35vh;
+  min-height: 200px;
+  max-height: 400px;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -88,17 +90,25 @@ html, body {
   justify-content: center;
   width: 25vw;
   height: 25vw;
+  min-width: 120px;
+  min-height: 120px;
+  max-width: 200px;
+  max-height: 200px;
 }
 
 .action-buttons {
   display: flex;
   flex-direction: column;
-  gap: 2vw;
+  gap: clamp(8px, 2vw, 16px);
 }
 
 .action-btn {
   width: clamp(60px, 18vw, 120px);
   height: clamp(40px, 8vw, 80px);
+  min-width: 60px;
+  min-height: 40px;
+  max-width: 120px;
+  max-height: 80px;
   background-color: rgba(254, 95, 0, 0.8);
   border: 1px solid #FE5F00;
   color: #fff;
@@ -107,6 +117,10 @@ html, body {
   border-radius: clamp(4px, 1vw, 8px);
   -webkit-tap-highlight-color: transparent;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .action-btn:active {
@@ -148,22 +162,33 @@ html, body {
     justify-content: space-between;
     align-items: center;
     padding: 2vh 2vw;
+    min-height: 300px;
+    max-height: 600px;
   }
 
   .movement-controls {
     width: clamp(120px, 20vh, 200px);
     height: clamp(120px, 20vh, 200px);
+    min-width: 120px;
+    min-height: 120px;
+    max-width: 200px;
+    max-height: 200px;
   }
 
   .action-buttons {
     flex-direction: column;
     gap: clamp(8px, 2vh, 16px);
     width: clamp(120px, 30vw, 200px);
+    min-width: 120px;
   }
 
   .action-btn {
     width: clamp(80px, 25vw, 150px);
     height: clamp(30px, 6vh, 60px);
+    min-width: 80px;
+    min-height: 30px;
+    max-width: 150px;
+    max-height: 60px;
     font-size: clamp(8px, 2vh, 16px);
   }
 

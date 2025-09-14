@@ -133,8 +133,8 @@ const VirtualJoystick = ({ onMove, size = 120 }) => {
       ref={joystickRef}
       className="virtual-joystick"
       style={{
-        width: size,
-        height: size,
+        width: '100%',
+        height: '100%',
         position: 'relative',
         display: 'flex',
         alignItems: 'center',

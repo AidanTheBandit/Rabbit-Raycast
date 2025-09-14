@@ -236,12 +236,18 @@ export class DoomDemoScene extends Scene {
     if (this.joystickMovement.magnitude > 0.1) {
       console.log('DoomDemo: Using joystick movement', this.joystickMovement);
 
-      // Joystick provides analog movement in x/y directions
-      // x: left/right strafe, y: forward/backward
-      const strafeAmount = this.joystickMovement.x * moveSpeed * dt;
+      // Joystick provides analog movement:
+      // x: left/right camera turning, y: forward/backward movement
+      const turnAmount = this.joystickMovement.x * turnSpeed * dt;
       const forwardAmount = -this.joystickMovement.y * moveSpeed * dt; // Negative because y is inverted in joystick
 
-      console.log('DoomDemo: Movement amounts', { strafeAmount, forwardAmount });
+      console.log('DoomDemo: Movement amounts', { turnAmount, forwardAmount });
+
+      // Handle camera turning (left/right)
+      if (Math.abs(turnAmount) > 0.01) {
+        this.player.angle += turnAmount;
+        console.log('DoomDemo: Turned camera by', turnAmount, 'new angle:', this.player.angle);
+      }
 
       // Handle forward/backward movement
       if (Math.abs(forwardAmount) > 0.01) {
@@ -261,29 +267,6 @@ export class DoomDemoScene extends Scene {
             console.log('DoomDemo: Player nudged to valid position', validPos);
           } else {
             console.log('DoomDemo: Invalid position, movement blocked');
-          }
-        }
-      }
-
-      // Handle strafing
-      if (Math.abs(strafeAmount) > 0.01) {
-        const strafeAngle = this.player.angle + Math.PI / 2;
-        const newX = this.player.x + Math.cos(strafeAngle) * strafeAmount;
-        const newY = this.player.y + Math.sin(strafeAngle) * strafeAmount;
-        console.log('DoomDemo: Strafing', { oldX: this.player.x, oldY: this.player.y, newX, newY });
-        if (this.engine.physics.isValidPosition(newX, newY)) {
-          this.player.x = newX;
-          this.player.y = newY;
-          console.log('DoomDemo: Player strafed to', this.player.x, this.player.y);
-        } else {
-          // Try to find a nearby valid position to prevent getting stuck
-          const validPos = this.engine.physics.findNearestValidPosition(newX, newY, 0.5);
-          if (validPos.x !== newX || validPos.y !== newY) {
-            this.player.x = validPos.x;
-            this.player.y = validPos.y;
-            console.log('DoomDemo: Player nudged to valid position', validPos);
-          } else {
-            console.log('DoomDemo: Invalid strafe position, movement blocked');
           }
         }
       }
@@ -472,29 +455,30 @@ export class DoomDemoScene extends Scene {
     const ctx = renderer.ctx;
     ctx.save();
 
-    const fontSize = Math.max(12, renderer.width / 20);
+    // Use viewport-based font size for better scaling
+    const fontSize = Math.max(14, Math.min(renderer.width, renderer.height) / 25);
     ctx.font = `${fontSize}px monospace`;
-    const lineHeight = fontSize + 5;
-    let y = 20;
+    const lineHeight = fontSize + 6;
+    let y = 25;
 
     // Calculate background height
-    const bgHeight = y + lineHeight * 5 + 10;
+    const bgHeight = y + lineHeight * 5 + 15;
 
-    // HUD background
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    // HUD background with better scaling
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
     ctx.fillRect(0, 0, renderer.width, bgHeight);
 
-    // HUD text
+    // HUD text with better positioning
     ctx.fillStyle = '#fff';
-    ctx.fillText(`Health: ${this.gameStats.health}`, 10, y);
+    ctx.fillText(`Health: ${this.gameStats.health}`, 15, y);
     y += lineHeight;
-    ctx.fillText(`Ammo: ${this.gameStats.ammo}`, 10, y);
+    ctx.fillText(`Ammo: ${this.gameStats.ammo}`, 15, y);
     y += lineHeight;
-    ctx.fillText(`Level: ${this.gameStats.level}`, 10, y);
+    ctx.fillText(`Level: ${this.gameStats.level}`, 15, y);
     y += lineHeight;
-    ctx.fillText(`Enemies: ${this.gameStats.enemies}`, 10, y);
+    ctx.fillText(`Enemies: ${this.gameStats.enemies}`, 15, y);
     y += lineHeight;
-    ctx.fillText(`Score: ${this.gameStats.score}`, 10, y);
+    ctx.fillText(`Score: ${this.gameStats.score}`, 15, y);
 
     ctx.restore();
   }
@@ -507,18 +491,20 @@ export class DoomDemoScene extends Scene {
     ctx.save();
 
     if (this.gameState === 'levelComplete') {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
       ctx.fillRect(0, 0, renderer.width, renderer.height);
       ctx.fillStyle = '#fff';
-      ctx.font = '24px monospace';
+      const fontSize = Math.max(20, Math.min(renderer.width, renderer.height) / 20);
+      ctx.font = `${fontSize}px monospace`;
       ctx.textAlign = 'center';
-      ctx.fillText('LEVEL COMPLETE!', renderer.width / 2, renderer.height / 2 - 30);
+      ctx.fillText('LEVEL COMPLETE!', renderer.width / 2, renderer.height / 2 - 40);
       ctx.fillText(`Level ${this.currentLevel}`, renderer.width / 2, renderer.height / 2 + 10);
     } else if (this.gameState === 'gameOver') {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
       ctx.fillRect(0, 0, renderer.width, renderer.height);
       ctx.fillStyle = this.enemies.length === 0 ? '#0f0' : '#f00';
-      ctx.font = '24px monospace';
+      const fontSize = Math.max(20, Math.min(renderer.width, renderer.height) / 20);
+      ctx.font = `${fontSize}px monospace`;
       ctx.textAlign = 'center';
       const message = this.enemies.length === 0 ? 'GAME COMPLETED!' : 'GAME OVER';
       ctx.fillText(message, renderer.width / 2, renderer.height / 2);
