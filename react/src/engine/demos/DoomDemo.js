@@ -102,6 +102,14 @@ export class DoomDemoScene extends Scene {
   }
 
   /**
+   * Set joystick movement from touch controls
+   */
+  setJoystickMovement(movement) {
+    this.joystickMovement = movement;
+    console.log('DoomDemo: Joystick movement set', movement);
+  }
+
+  /**
    * Setup input mappings for the demo
    */
   setupInputMappings() {
@@ -332,6 +340,11 @@ export class DoomDemoScene extends Scene {
       this.player.y + Math.sin(this.player.angle) * 0.5,
       this.player.angle
     );
+
+    // Also trigger screen muzzle flash for immediate visual feedback
+    if (this.engine.renderer && this.engine.renderer.triggerMuzzleFlash) {
+      this.engine.renderer.triggerMuzzleFlash();
+    }
 
     // Play shooting sound
     this.engine.audio.playProceduralSound(800, 0.1, 'square', 0.3);

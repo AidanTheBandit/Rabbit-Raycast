@@ -70,12 +70,12 @@ const RaycastingEngine = () => {
             <VirtualJoystick onMove={handleJoystickMove} />
           </div>
           <div className="action-buttons">
-            <button tabIndex="0" className="shoot" onTouchStart={() => handleTouch('shoot', true)} onTouchEnd={() => handleTouch('shoot', false)}
-                    onMouseDown={() => handleTouch('shoot', true)} onMouseUp={() => handleTouch('shoot', false)}>FIRE</button>
-            <button tabIndex="0" className="use" onTouchStart={() => handleTouch('use', true)} onTouchEnd={() => handleTouch('use', false)}
-                    onMouseDown={() => handleTouch('use', true)} onMouseUp={() => handleTouch('use', false)}>USE</button>
-            <button tabIndex="0" className="strafe" onTouchStart={() => handleTouch('strafe', true)} onTouchEnd={() => handleTouch('strafe', false)}
-                    onMouseDown={() => handleTouch('strafe', true)} onMouseUp={() => handleTouch('strafe', false)}>STRAFE</button>
+            <button tabIndex="0" className="action-btn shoot" onTouchStart={(e) => { e.preventDefault(); handleTouch('shoot', true); }} onTouchEnd={(e) => { e.preventDefault(); handleTouch('shoot', false); }}
+                    onMouseDown={(e) => { e.preventDefault(); handleTouch('shoot', true); }} onMouseUp={(e) => { e.preventDefault(); handleTouch('shoot', false); }}>FIRE</button>
+            <button tabIndex="0" className="action-btn use" onTouchStart={(e) => { e.preventDefault(); handleTouch('use', true); }} onTouchEnd={(e) => { e.preventDefault(); handleTouch('use', false); }}
+                    onMouseDown={(e) => { e.preventDefault(); handleTouch('use', true); }} onMouseUp={(e) => { e.preventDefault(); handleTouch('use', false); }}>USE</button>
+            <button tabIndex="0" className="action-btn strafe" onTouchStart={(e) => { e.preventDefault(); handleTouch('strafe', true); }} onTouchEnd={(e) => { e.preventDefault(); handleTouch('strafe', false); }}
+                    onMouseDown={(e) => { e.preventDefault(); handleTouch('strafe', true); }} onMouseUp={(e) => { e.preventDefault(); handleTouch('strafe', false); }}>STRAFE</button>
           </div>
         </div>
       </div>
