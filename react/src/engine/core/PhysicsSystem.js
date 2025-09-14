@@ -36,7 +36,7 @@ export class PhysicsSystem {
   /**
    * Check if a position is valid (not colliding with walls)
    */
-  isValidPosition(x, y, radius = 0.2) {
+  isValidPosition(x, y, radius = 0.3) {
     if (!this.world) return true;
 
     const mapX = Math.floor(x);
@@ -54,13 +54,17 @@ export class PhysicsSystem {
 
     // Check radius-based collision for smoother movement
     if (radius > 0) {
-      // Use fewer corner checks and smaller radius for less strict collision
+      // Use 8 directional checks plus center for better collision detection
       const checkPoints = [
         [x, y], // Center
-        [x - radius * 0.7, y], // Left
-        [x + radius * 0.7, y], // Right
-        [x, y - radius * 0.7], // Top
-        [x, y + radius * 0.7]  // Bottom
+        [x - radius, y], // Left
+        [x + radius, y], // Right
+        [x, y - radius], // Top
+        [x, y + radius], // Bottom
+        [x - radius * 0.7, y - radius * 0.7], // Top-left
+        [x + radius * 0.7, y - radius * 0.7], // Top-right
+        [x - radius * 0.7, y + radius * 0.7], // Bottom-left
+        [x + radius * 0.7, y + radius * 0.7]  // Bottom-right
       ];
 
       for (const [cx, cy] of checkPoints) {
@@ -82,7 +86,8 @@ export class PhysicsSystem {
    * Cast a ray and return the distance to the nearest wall
    */
   castRay(originX, originY, angle, maxDistance = 20) {
-    const cacheKey = `${originX.toFixed(2)},${originY.toFixed(2)},${angle.toFixed(3)}`;
+    // Round coordinates and angle for better caching
+    const cacheKey = `${originX.toFixed(1)},${originY.toFixed(1)},${angle.toFixed(2)}`;
 
     // Check cache first
     if (this.raycastCache.has(cacheKey)) {
@@ -96,7 +101,7 @@ export class PhysicsSystem {
     let x = originX;
     let y = originY;
 
-    for (let depth = 0; depth < maxDistance; depth += 0.1) {
+    for (let depth = 0; depth < maxDistance; depth += 0.05) {
       const testX = Math.floor(x);
       const testY = Math.floor(y);
 
@@ -108,8 +113,8 @@ export class PhysicsSystem {
         return result;
       }
 
-      x += cos * 0.1;
-      y += sin * 0.1;
+      x += cos * 0.05;
+      y += sin * 0.05;
     }
 
     const result = maxDistance;
@@ -204,11 +209,11 @@ export class PhysicsSystem {
    * Update raycast cache (remove old entries)
    */
   updateRaycastCache() {
-    // Simple cache size management
-    if (this.raycastCache.size > 1000) {
-      // Clear half the cache
+    // More aggressive cache management for better performance
+    if (this.raycastCache.size > 500) {
+      // Clear 30% of the cache to maintain performance
       const entries = Array.from(this.raycastCache.entries());
-      const toRemove = entries.slice(0, 500);
+      const toRemove = entries.slice(0, Math.floor(entries.length * 0.3));
       toRemove.forEach(([key]) => this.raycastCache.delete(key));
     }
   }

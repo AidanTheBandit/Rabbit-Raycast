@@ -33,6 +33,10 @@ export class DoomDemoScene extends Scene {
     this.joystickMovement = { x: 0, y: 0, magnitude: 0 };
     this.shootCooldown = 0;
 
+    // Performance optimizations
+    this.enemyUpdateCounter = 0;
+    this.enemyUpdateFrequency = 2; // Update every other frame
+
     console.log('DoomDemoScene: Constructor called, levelManager created:', !!this.levelManager);
   }
 
@@ -83,6 +87,13 @@ export class DoomDemoScene extends Scene {
 
     // Update game logic
     this.updateGameLogic(deltaTime);
+
+    // Update enemies with performance optimization
+    this.enemyUpdateCounter++;
+    if (this.enemyUpdateCounter >= this.enemyUpdateFrequency) {
+      this.enemyUpdateCounter = 0;
+      this.updateEnemies(deltaTime * this.enemyUpdateFrequency);
+    }
 
     // Check win/lose conditions
     this.checkGameConditions();
@@ -188,11 +199,40 @@ export class DoomDemoScene extends Scene {
   }
 
   /**
+   * Update enemies with performance optimizations
+   */
+  updateEnemies(deltaTime) {
+    if (!this.player) return;
+
+    // Update enemies
+    for (let i = this.enemies.length - 1; i >= 0; i--) {
+      const enemy = this.enemies[i];
+
+      // Distance culling - don't update enemies too far away
+      const dx = enemy.x - this.player.x;
+      const dy = enemy.y - this.player.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance > 25) continue; // Skip enemies more than 25 units away
+
+      enemy.update(deltaTime);
+
+      // Remove dead enemies
+      if (enemy.health <= 0) {
+        this.enemies.splice(i, 1);
+        this.score += GAME_CONSTANTS.SCORE_PER_ENEMY;
+        this.player.ammo = Math.min(this.player.ammo + GAME_CONSTANTS.AMMO_DROP, GAME_CONSTANTS.MAX_AMMO);
+      }
+    }
+
+    this.gameStats.enemies = this.enemies.length;
+  }
+
+  /**
    * Update game logic
    */
   updateGameLogic(deltaTime) {
     if (!this.player) {
-      console.log('DoomDemo: No player in updateGameLogic');
       return;
     }
 
@@ -206,16 +246,13 @@ export class DoomDemoScene extends Scene {
 
     // Handle actions
     const shootActive = this.engine.input.isActionActive('shoot');
-    console.log('DoomDemo: Shoot action active?', shootActive, 'cooldown:', this.shootCooldown);
 
     if (shootActive && this.shootCooldown <= 0) {
-      console.log('DoomDemo: Triggering shoot');
       this.handleShoot();
       this.shootCooldown = 200; // 200ms cooldown between shots
     }
     if (this.engine.input.isActionActive('use')) {
       // Placeholder for use action (e.g., open door, interact)
-      console.log('Use action triggered');
     }
 
     // Check win/lose conditions
@@ -234,39 +271,29 @@ export class DoomDemoScene extends Scene {
 
     // Use joystick movement if available and significant
     if (this.joystickMovement.magnitude > 0.1) {
-      console.log('DoomDemo: Using joystick movement', this.joystickMovement);
-
       // Joystick provides analog movement:
       // x: left/right camera turning, y: forward/backward movement
       const turnAmount = this.joystickMovement.x * turnSpeed * dt;
       const forwardAmount = -this.joystickMovement.y * moveSpeed * dt; // Negative because y is inverted in joystick
 
-      console.log('DoomDemo: Movement amounts', { turnAmount, forwardAmount });
-
       // Handle camera turning (left/right)
       if (Math.abs(turnAmount) > 0.01) {
         this.player.angle += turnAmount;
-        console.log('DoomDemo: Turned camera by', turnAmount, 'new angle:', this.player.angle);
       }
 
       // Handle forward/backward movement
       if (Math.abs(forwardAmount) > 0.01) {
         const newX = this.player.x + Math.cos(this.player.angle) * forwardAmount;
         const newY = this.player.y + Math.sin(this.player.angle) * forwardAmount;
-        console.log('DoomDemo: Moving forward/backward', { oldX: this.player.x, oldY: this.player.y, newX, newY });
         if (this.engine.physics.isValidPosition(newX, newY)) {
           this.player.x = newX;
           this.player.y = newY;
-          console.log('DoomDemo: Player moved to', this.player.x, this.player.y);
         } else {
           // Try to find a nearby valid position to prevent getting stuck
           const validPos = this.engine.physics.findNearestValidPosition(newX, newY, 0.5);
           if (validPos.x !== newX || validPos.y !== newY) {
             this.player.x = validPos.x;
             this.player.y = validPos.y;
-            console.log('DoomDemo: Player nudged to valid position', validPos);
-          } else {
-            console.log('DoomDemo: Invalid position, movement blocked');
           }
         }
       }
@@ -335,23 +362,13 @@ export class DoomDemoScene extends Scene {
    * Handle shooting
    */
   handleShoot() {
-    console.log('DoomDemo: handleShoot called', {
-      hasPlayer: !!this.player,
-      ammo: this.player?.ammo,
-      gameState: this.gameState
-    });
-
     if (!this.player || this.player.ammo <= 0 || this.gameState !== 'playing') {
-      console.log('DoomDemo: Cannot shoot - conditions not met');
       return;
     }
-
-    console.log('DoomDemo: Shooting!');
 
     this.player.shoot();
 
     // Create muzzle flash particles
-    console.log('DoomDemo: Creating muzzle flash at', this.player.x + Math.cos(this.player.angle) * 0.5, this.player.y + Math.sin(this.player.angle) * 0.5);
     this.engine.particles.createMuzzleFlash(
       this.player.x + Math.cos(this.player.angle) * 0.5,
       this.player.y + Math.sin(this.player.angle) * 0.5,
@@ -388,8 +405,6 @@ export class DoomDemoScene extends Scene {
       );
     });
 
-    console.log('DoomDemo: Found', visibleEnemies.length, 'visible enemies');
-
     // Hit closest enemy
     if (visibleEnemies.length > 0) {
       const closestEnemy = visibleEnemies.reduce((closest, enemy) => {
@@ -402,7 +417,6 @@ export class DoomDemoScene extends Scene {
         return distCurrent < distClosest ? enemy : closest;
       });
 
-      console.log('DoomDemo: Hitting enemy at', closestEnemy.x, closestEnemy.y);
       closestEnemy.takeDamage(GAME_CONSTANTS.SHOOT_DAMAGE);
       // Create blood particles
       this.engine.particles.createBloodSplatter(closestEnemy.x, closestEnemy.y);

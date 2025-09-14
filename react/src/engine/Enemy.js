@@ -12,6 +12,12 @@ export class Enemy {
     this.lastAttack = 0;
     this.attackCooldown = GAME_CONSTANTS.ENEMY_ATTACK_COOLDOWN;
     this.size = GAME_CONSTANTS.ENEMY_SIZE;
+
+    // Performance optimizations
+    this.lastLineOfSightCheck = 0;
+    this.lineOfSightCache = false;
+    this.lineOfSightCacheTime = 0;
+    this.cacheDuration = 200; // Cache line of sight for 200ms
   }
 
   // Scene system methods
@@ -68,6 +74,13 @@ export class Enemy {
   hasLineOfSight() {
     if (!this.scene || !this.scene.player) return false;
 
+    const now = Date.now();
+
+    // Use cached result if recent
+    if (now - this.lineOfSightCacheTime < this.cacheDuration) {
+      return this.lineOfSightCache;
+    }
+
     const dx = this.scene.player.x - this.x;
     const dy = this.scene.player.y - this.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -76,7 +89,11 @@ export class Enemy {
     const angle = Math.atan2(dy, dx);
     const rayDistance = this.scene.engine.physics.castRay(this.x, this.y, angle, distance + 1);
 
-    return rayDistance >= distance;
+    // Cache the result
+    this.lineOfSightCache = rayDistance >= distance;
+    this.lineOfSightCacheTime = now;
+
+    return this.lineOfSightCache;
   }
 
   attackPlayer() {
@@ -84,7 +101,6 @@ export class Enemy {
 
     // Check line of sight before attacking
     if (!this.hasLineOfSight()) {
-      console.log('Enemy: No line of sight, cannot attack');
       return;
     }
 
@@ -93,8 +109,6 @@ export class Enemy {
     if (!this.scene.player.isAlive()) {
       this.scene.gameState = 'gameOver';
     }
-
-    console.log('Enemy: Attacked player for', GAME_CONSTANTS.ENEMY_ATTACK_DAMAGE, 'damage');
   }
 
   takeDamage(damage) {

@@ -20,7 +20,6 @@ export class Renderer {
 
   render(scene) {
     if (!scene) {
-      console.log('Renderer: No scene provided');
       return;
     }
 
@@ -28,16 +27,6 @@ export class Renderer {
       console.error('Renderer: No canvas context available');
       return;
     }
-
-    console.log('Renderer: Rendering scene', {
-      sceneName: scene.name,
-      hasPlayer: !!scene.player,
-      hasMap: !!scene.map,
-      hasEnemies: !!scene.enemies,
-      playerPos: scene.player ? `${scene.player.x.toFixed(1)}, ${scene.player.y.toFixed(1)}` : 'none',
-      mapSize: scene.map ? `${scene.map[0]?.length}x${scene.map.length}` : 'none',
-      enemiesCount: scene.enemies ? scene.enemies.length : 0
-    });
 
     // Set canvas dimensions from scene if available
     if (scene.width && scene.height) {
@@ -80,17 +69,8 @@ export class Renderer {
     const maxDepth = scene.maxDepth;
 
     if (!player || !map || !Array.isArray(map) || map.length === 0) {
-      console.log('Renderer: Missing required scene data', { player: !!player, map: !!map, rayCount, fov, maxDepth });
       return;
     }
-
-    console.log('Renderer: Rendering scene', {
-      playerPos: `${player.x.toFixed(1)}, ${player.y.toFixed(1)}`,
-      playerAngle: player.angle.toFixed(2),
-      mapSize: `${map[0].length}x${map.length}`,
-      rayCount,
-      enemies: enemies.length
-    });
 
     // Collect all renderable objects with their distances
     const renderQueue = [];
@@ -108,12 +88,15 @@ export class Renderer {
       });
     }
 
-    // Add enemies to render queue
+    // Add enemies to render queue with distance culling
     if (enemies && Array.isArray(enemies)) {
       enemies.forEach((enemy, index) => {
         const dx = enemy.x - player.x;
         const dy = enemy.y - player.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Distance culling - don't render enemies too far away
+        if (distance > maxDepth * 1.5) return;
 
         // Calculate angle relative to player
         const angle = Math.atan2(dy, dx) - player.angle;
@@ -142,8 +125,6 @@ export class Renderer {
 
     // Sort by distance (closest first for proper depth - render far to near)
     renderQueue.sort((a, b) => b.distance - a.distance);
-
-    console.log('Renderer: Render queue', renderQueue.length, 'items');
 
     // Render in depth order
     renderQueue.forEach(item => {
@@ -215,7 +196,7 @@ export class Renderer {
     const mapWidth = map[0].length;
     const mapHeight = map.length;
 
-    for (let depth = 0; depth < maxDepth; depth += 0.1) {
+    for (let depth = 0; depth < maxDepth; depth += 0.05) {
       const testX = Math.floor(x);
       const testY = Math.floor(y);
 
@@ -225,8 +206,8 @@ export class Renderer {
         return depth;
       }
 
-      x += cos * 0.1;
-      y += sin * 0.1;
+      x += cos * 0.05;
+      y += sin * 0.05;
     }
 
     return maxDepth;
