@@ -1,129 +1,15 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 .App {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
-  color: white;
-  font-family: 'Courier New', monospace;
-}
-
-.app-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.app-header h1 {
-  color: #FE5F00;
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-  font-weight: bold;
-}
-
-.app-header p {
-  color: #ccc;
-  font-size: 1.1rem;
+  width: 100vw;
+  height: 100vh;
   margin: 0;
-}
-
-.app-main {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-}
-
-.app-footer {
-  margin-top: 2rem;
-  padding: 1rem;
-  text-align: center;
-  color: #888;
-  font-size: 0.9rem;
-  border-top: 1px solid rgba(254, 95, 0, 0.2);
-}
-
-.app-footer p {
-  margin: 0;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  #root {
-    padding: 1rem;
-  }
-
-  .app-header h1 {
-    font-size: 2rem;
-  }
-
-  .app-header p {
-    font-size: 1rem;
-  }
-
-  .app-footer {
-    margin-top: 1rem;
-    padding: 0.5rem;
-    font-size: 0.8rem;
-  }
-}
-
-@media (max-width: 480px) {
-  #root {
-    padding: 0.5rem;
-  }
-
-  .app-header {
-    margin-bottom: 1rem;
-  }
-
-  .app-header h1 {
-    font-size: 1.8rem;
-  }
-
-  .app-header p {
-    font-size: 0.9rem;
-  }
-}
-
-/* Loading animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.App {
-  animation: fadeIn 0.5s ease-out;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1a1a2e;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #FE5F00;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #e55a00;
+  padding: 0;
+  background: #000;
+  overflow: hidden;
 }

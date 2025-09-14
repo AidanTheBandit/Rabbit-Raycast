@@ -1,39 +1,37 @@
-/* Raycasting Engine - React Version */
-/* R1 Doom - Responsive layout for portrait/landscape */
+/* R1 Doom - Full Screen Layout */
 
-.raycasting-container {
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
   width: 100vw;
   height: 100vh;
   background-color: #000;
   color: #fff;
   font-family: 'Courier New', monospace;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
 }
 
-.game-wrapper {
+.game-container {
   position: relative;
-  width: 240px;
-  height: 320px;
-  border: 2px solid #FE5F00;
-  border-radius: 8px;
-  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
   background-color: #000;
 }
 
-/* Game Canvas */
+/* Game Canvas - Full Screen */
 .game-canvas {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background-color: #333;
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
@@ -44,12 +42,12 @@
 /* HUD Elements */
 .hud {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  right: 8px;
+  top: 2vw;
+  left: 2vw;
+  right: 2vw;
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 3vw;
   color: #FE5F00;
   z-index: 50;
   pointer-events: none;
@@ -57,80 +55,72 @@
   text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
 }
 
-.health, .ammo {
+.hud span {
   background-color: rgba(0, 0, 0, 0.7);
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 1vw;
+  border-radius: 0.5vw;
   border: 1px solid #FE5F00;
 }
 
-/* Touch Controls */
+/* Touch Controls - Portrait Mode (240x320) */
 .touch-controls {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 100px;
+  height: 35vh;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  padding: 8px;
+  padding: 2vw;
   z-index: 60;
-}
-
-.movement-pad {
-  display: flex;
-  align-items: center;
 }
 
 .dpad {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 25vw;
+  height: 25vw;
 }
 
-.dpad-btn {
+.dpad button {
   position: absolute;
-  width: 24px;
-  height: 24px;
+  width: 8vw;
+  height: 8vw;
   background-color: rgba(254, 95, 0, 0.8);
   border: 1px solid #FE5F00;
   color: #fff;
-  font-size: 12px;
-  border-radius: 4px;
+  font-size: 3vw;
+  border-radius: 1vw;
   display: flex;
   align-items: center;
   justify-content: center;
   -webkit-tap-highlight-color: transparent;
   cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.1s ease;
 }
 
-.dpad-btn:active,
-.dpad-btn:hover {
+.dpad button:active {
   background-color: rgba(254, 95, 0, 1);
 }
 
-.dpad-btn.up {
+.dpad button.up {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
 }
 
-.dpad-btn.down {
+.dpad button.down {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
 }
 
-.dpad-btn.left {
+.dpad button.left {
   left: 0;
   top: 50%;
   transform: translateY(-50%);
 }
 
-.dpad-btn.right {
+.dpad button.right {
   right: 0;
   top: 50%;
   transform: translateY(-50%);
@@ -139,25 +129,23 @@
 .action-buttons {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2vw;
 }
 
 .action-btn {
-  width: 60px;
-  height: 24px;
+  width: 18vw;
+  height: 8vw;
   background-color: rgba(254, 95, 0, 0.8);
   border: 1px solid #FE5F00;
   color: #fff;
-  font-size: 10px;
+  font-size: 2.5vw;
   font-weight: bold;
-  border-radius: 4px;
+  border-radius: 1vw;
   -webkit-tap-highlight-color: transparent;
   cursor: pointer;
-  transition: background-color 0.1s ease;
 }
 
-.action-btn:active,
-.action-btn:hover {
+.action-btn:active {
   background-color: rgba(254, 95, 0, 1);
 }
 
@@ -166,191 +154,57 @@
   border-color: #ff0000;
 }
 
-.action-btn.shoot:active,
-.action-btn.shoot:hover {
+.action-btn.shoot:active {
   background-color: rgba(255, 0, 0, 1);
 }
 
-/* Controls Info Panel */
-.controls-info {
-  margin-top: 20px;
-  max-width: 600px;
-  width: 100%;
-  padding: 20px;
-  background-color: rgba(0, 0, 0, 0.8);
-  border-radius: 8px;
-  border: 1px solid #FE5F00;
-}
-
-.controls-info h3 {
-  color: #FE5F00;
-  margin-bottom: 15px;
-  text-align: center;
-  font-size: 18px;
-}
-
-.controls-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.control-group {
-  background-color: rgba(255, 255, 255, 0.05);
-  padding: 15px;
-  border-radius: 6px;
-  border: 1px solid rgba(254, 95, 0, 0.3);
-}
-
-.control-group h4 {
-  color: #FE5F00;
-  margin-bottom: 10px;
-  font-size: 14px;
-  text-align: center;
-}
-
-.control-group ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.control-group li {
-  margin-bottom: 8px;
-  font-size: 12px;
-  color: #ccc;
-}
-
-.control-group kbd {
-  background-color: rgba(254, 95, 0, 0.2);
-  border: 1px solid #FE5F00;
-  border-radius: 3px;
-  padding: 2px 6px;
-  font-size: 11px;
-  font-family: monospace;
-  color: #FE5F00;
-}
-
-/* Responsive Design */
-@media (max-width: 480px) {
-  .raycasting-container {
-    padding: 10px;
-  }
-
-  .game-wrapper {
-    width: 200px;
-    height: 267px;
-  }
-
-  .controls-info {
-    margin-top: 15px;
-    padding: 15px;
-  }
-
-  .controls-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-}
-
-@media (min-width: 768px) {
-  .game-wrapper {
-    width: 320px;
-    height: 427px;
-  }
-
+/* Landscape Mode - When R1 is rotated horizontally */
+@media (orientation: landscape) {
   .touch-controls {
-    height: 120px;
+    height: 100vh;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2vh 2vw;
   }
 
   .dpad {
-    width: 100px;
-    height: 100px;
+    width: 20vh;
+    height: 20vh;
   }
 
-  .dpad-btn {
-    width: 30px;
-    height: 30px;
-    font-size: 14px;
+  .dpad button {
+    width: 6vh;
+    height: 6vh;
+    font-size: 2vh;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 2vh;
+    width: 30vw;
   }
 
   .action-btn {
-    width: 80px;
-    height: 30px;
-    font-size: 12px;
+    width: 25vw;
+    height: 6vh;
+    font-size: 2vh;
+  }
+
+  .hud {
+    top: 2vh;
+    left: 2vw;
+    right: 2vw;
+    font-size: 2vh;
+  }
+
+  .game-canvas {
+    width: 100vw;
+    height: 100vh;
   }
 }
 
-/* Loading Animation */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.loading {
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-/* Game Status Indicators */
-.game-status {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(0, 0, 0, 0.9);
-  padding: 20px;
-  border-radius: 8px;
-  border: 2px solid #FE5F00;
-  text-align: center;
-  z-index: 100;
-}
-
-.game-status h2 {
-  color: #FE5F00;
-  margin-bottom: 10px;
-  font-size: 16px;
-}
-
-.game-status p {
-  color: #ccc;
-  font-size: 12px;
-  margin-bottom: 15px;
-}
-
-.restart-btn {
-  background-color: #FE5F00;
-  border: none;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: bold;
-  transition: background-color 0.2s ease;
-}
-
-.restart-btn:hover {
-  background-color: #e55a00;
-}
-
-/* Performance Info (for debugging) */
-.performance-info {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background-color: rgba(0, 0, 0, 0.7);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 10px;
-  color: #ccc;
-  border: 1px solid rgba(254, 95, 0, 0.5);
-  display: none; /* Hidden by default */
-}
-
-.performance-info.show {
-  display: block;
+/* Hidden class for showing/hiding elements */
+.hidden {
+  display: none !important;
 }
