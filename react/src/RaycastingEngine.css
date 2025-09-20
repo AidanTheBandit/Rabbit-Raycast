@@ -45,6 +45,62 @@ html, body {
   outline-offset: -2px;
 }
 
+/* Gear menu */
+.gear-menu {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 70;
+}
+
+.gear-button {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 28px;
+  padding: 8px;
+  line-height: 1;
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gear-panel {
+  position: absolute;
+  margin-top: 8px;
+  width: 220px;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid #FE5F00;
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.gear-panel .panel-title {
+  color: #FE5F00;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.gear-panel .panel-item {
+  width: 100%;
+  background: rgba(254,95,0,0.85);
+  color: #fff;
+  border: 1px solid #FE5F00;
+  border-radius: 4px;
+  padding: 8px;
+  margin: 6px 0;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.gear-panel .panel-item[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* HUD Elements */
 .hud {
   position: absolute;
