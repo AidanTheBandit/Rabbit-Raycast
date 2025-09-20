@@ -11,6 +11,8 @@ const RaycastingEngine = () => {
   const [gameState, setGameState] = useState({ health: 100, ammo: 50, level: 1, enemies: 0, score: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [joystickMovement, setJoystickMovement] = useState({ x: 0, y: 0, magnitude: 0 });
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [lastPerfResults, setLastPerfResults] = useState(null);
 
   useEffect(() => {
     const initEngine = async () => {
@@ -60,11 +62,57 @@ const RaycastingEngine = () => {
     }
   };
 
+  const getCurrentScene = () => engineRef.current?.sceneManager?.currentScene;
+
+  const startPerfTest = (durationMs = 10000) => {
+    const scene = getCurrentScene();
+    if (scene && typeof scene.startPerformanceTest === 'function') {
+      scene.startPerformanceTest({ durationMs });
+      setIsMenuOpen(false);
+      // Poll once after completion window to capture results (simple approach)
+      setTimeout(() => {
+        try {
+          const results = scene.getPerformanceResults ? scene.getPerformanceResults() : null;
+          if (results) {
+            setLastPerfResults(results);
+          }
+        } catch (e) {}
+      }, durationMs + 200);
+    }
+  };
+
+  const exportPerfResults = () => {
+    const scene = getCurrentScene();
+    const results = scene?.getPerformanceResults ? scene.getPerformanceResults() : lastPerfResults;
+    if (!results) return;
+    const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'perf-results.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       {isLoading && <LoadingScreen />}
       <div className="game-container">
         <canvas ref={canvasRef} className="game-canvas" tabIndex="0" width="240" height="320" onClick={() => canvasRef.current?.focus()} />
+        {/* Gear menu button */}
+        <div className="gear-menu">
+          <button tabIndex="0" className="gear-button" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Open settings">⚙︎</button>
+          {isMenuOpen && (
+            <div className="gear-panel">
+              <div className="panel-title">Performance</div>
+              <button className="panel-item" onClick={() => startPerfTest(10000)}>Run 10s Perf Test</button>
+              <button className="panel-item" onClick={exportPerfResults} disabled={!lastPerfResults && !getCurrentScene()?.getPerformanceResults?.()}>Export Last Results</button>
+              <button className="panel-item" onClick={() => setIsMenuOpen(false)}>Close</button>
+            </div>
+          )}
+        </div>
         <div className="touch-controls">
           <div className="movement-controls">
             <VirtualJoystick onMove={handleJoystickMove} />

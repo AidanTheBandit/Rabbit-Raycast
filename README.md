@@ -1,6 +1,8 @@
 # Rabbit-Raycast
 
-A complete JavaScript implementation of a Doom-like 3D raycasting engine, optimized for the R1 device (240x320px portrait screen) with hardware integration and touch controls.
+A complete JavaScript implementation of a Doom-like 3D raycasting engine, for the Rabbit R1.
+
+Hardware considerations: R1 does not have a keyboard. It has gyro, scroll wheel, touch screen, and microphone. (240x320px portrait screen) 
 
 ![Rabbit-Raycast Demo](https://img.shields.io/badge/Demo-Raycasting-blue)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow)

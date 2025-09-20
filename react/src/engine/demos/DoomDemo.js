@@ -38,6 +38,16 @@ export class DoomDemoScene extends Scene {
     this.enemyUpdateFrequency = 2; // Update every other frame
 
     console.log('DoomDemoScene: Constructor called, levelManager created:', !!this.levelManager);
+
+    // Performance test state
+    this.perfTestActive = false;
+    this.perfStartTime = 0;
+    this.perfDurationMs = 0;
+    this.perfFrameTimes = [];
+    this.perfResults = null;
+    this.autopilotPhase = 0;
+    this.autopilotTimer = 0;
+    this.showPerfOverlayUntil = 0;
   }
 
   async onEnter(transitionData = {}) {
@@ -97,6 +107,16 @@ export class DoomDemoScene extends Scene {
 
     // Check win/lose conditions
     this.checkGameConditions();
+
+    // Performance test recording and autopilot
+    if (this.perfTestActive) {
+      this.perfFrameTimes.push(this.engine.deltaTime || deltaTime);
+      this.runAutopilot(deltaTime);
+
+      if (performance.now() - this.perfStartTime >= this.perfDurationMs) {
+        this.finishPerformanceTest();
+      }
+    }
   }
 
   onRender(renderer) {
@@ -110,6 +130,9 @@ export class DoomDemoScene extends Scene {
       playerHealth: this.player?.health,
       enemies: this.enemies.length
     });
+
+    // Render perf overlays
+    this.renderPerfOverlay(renderer);
   }
 
   /**
@@ -545,5 +568,136 @@ export class DoomDemoScene extends Scene {
       enemyCount: this.enemies.length,
       score: this.score
     };
+  }
+
+  /**
+   * Start performance test with autopilot
+   */
+  startPerformanceTest(options = {}) {
+    const { durationMs = 10000 } = options;
+    if (this.perfTestActive) return;
+    this.perfTestActive = true;
+    this.perfStartTime = performance.now();
+    this.perfDurationMs = durationMs;
+    this.perfFrameTimes = [];
+    this.perfResults = null;
+    this.autopilotPhase = 0;
+    this.autopilotTimer = 0;
+    this.joystickMovement = { x: 0, y: 0, magnitude: 0 };
+    console.log('▶️ Performance test started', { durationMs });
+  }
+
+  /**
+   * Autopilot script to exercise movement and shooting
+   */
+  runAutopilot(deltaTime) {
+    if (!this.player) return;
+    const dt = deltaTime;
+
+    // Phases in milliseconds
+    const phases = [3000, 3000, 2000, 2000];
+    const phase = this.autopilotPhase;
+    this.autopilotTimer += dt;
+
+    // Reset joystick each tick
+    this.joystickMovement = { x: 0, y: 0, magnitude: 0 };
+
+    if (phase === 0) {
+      // Move forward
+      this.joystickMovement = { x: 0, y: -0.9, magnitude: 0.9 };
+    } else if (phase === 1) {
+      // Spin in place
+      this.joystickMovement = { x: 1.0, y: 0, magnitude: 1.0 };
+    } else if (phase === 2) {
+      // Strafe-ish: small right turn and forward
+      this.joystickMovement = { x: 0.4, y: -0.7, magnitude: 0.8 };
+    } else if (phase === 3) {
+      // Spin and shoot repeatedly
+      this.joystickMovement = { x: 1.2, y: 0, magnitude: 1.2 };
+      if (this.shootCooldown <= 0) {
+        this.handleShoot();
+        this.shootCooldown = 200;
+      }
+    }
+
+    if (this.autopilotTimer >= phases[phase]) {
+      this.autopilotPhase = Math.min(this.autopilotPhase + 1, phases.length - 1);
+      this.autopilotTimer = 0;
+    }
+  }
+
+  /**
+   * Finish and compute performance results
+   */
+  finishPerformanceTest() {
+    this.perfTestActive = false;
+    const frameTimes = this.perfFrameTimes.slice();
+    const fpsSamples = frameTimes.map(ms => (ms > 0 ? 1000 / ms : 0));
+    const avgFps = fpsSamples.reduce((a, b) => a + b, 0) / Math.max(1, fpsSamples.length);
+    const maxFps = fpsSamples.length ? Math.max(...fpsSamples) : 0;
+    const sortedFps = fpsSamples.slice().sort((a, b) => a - b);
+    const worstCount = Math.max(1, Math.floor(sortedFps.length * 0.01));
+    const onePercentLow = sortedFps.length ? (sortedFps.slice(0, worstCount).reduce((a, b) => a + b, 0) / worstCount) : 0;
+    const frameInterval = this.engine.frameInterval || (1000 / (this.engine.config?.targetFPS || 60));
+    const droppedFrames = frameTimes.filter(ms => ms > frameInterval * 2).length;
+
+    this.perfResults = {
+      frames: frameTimes.length,
+      avgFps: Number(avgFps.toFixed(2)),
+      maxFps: Number(maxFps.toFixed(2)),
+      onePercentLow: Number(onePercentLow.toFixed(2)),
+      droppedFrames,
+      durationMs: this.perfDurationMs
+    };
+
+    this.showPerfOverlayUntil = performance.now() + 8000; // show for 8s
+    this.joystickMovement = { x: 0, y: 0, magnitude: 0 };
+    console.log('✅ Performance test finished', this.perfResults);
+  }
+
+  /**
+   * Get last performance results
+   */
+  getPerformanceResults() {
+    return this.perfResults;
+  }
+
+  /**
+   * Render performance overlays
+   */
+  renderPerfOverlay(renderer) {
+    const ctx = renderer.ctx;
+    if (this.perfTestActive) {
+      // Running overlay with progress
+      const now = performance.now();
+      const elapsed = now - this.perfStartTime;
+      const progress = Math.min(1, this.perfDurationMs ? elapsed / this.perfDurationMs : 0);
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(10, 10, 220, 60);
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px monospace';
+      ctx.fillText('Running Perf Test...', 20, 30);
+      ctx.strokeStyle = '#888';
+      ctx.strokeRect(20, 40, 200, 10);
+      ctx.fillStyle = '#0f0';
+      ctx.fillRect(20, 40, 200 * progress, 10);
+      ctx.restore();
+    } else if (this.perfResults && performance.now() < this.showPerfOverlayUntil) {
+      // Results overlay
+      const r = this.perfResults;
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.8)';
+      ctx.fillRect(10, 10, 220, 100);
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px monospace';
+      let y = 30;
+      ctx.fillText('Perf Results', 20, y); y += 18;
+      ctx.fillText(`Avg FPS: ${r.avgFps}`, 20, y); y += 16;
+      ctx.fillText(`Max FPS: ${r.maxFps}`, 20, y); y += 16;
+      ctx.fillText(`1% Low: ${r.onePercentLow}`, 20, y); y += 16;
+      ctx.fillText(`Dropped: ${r.droppedFrames}`, 20, y);
+      ctx.restore();
+    }
   }
 }
