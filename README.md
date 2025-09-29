@@ -7,7 +7,7 @@ Hardware considerations: R1 does not have a keyboard. It has gyro, scroll wheel,
 ![Rabbit-Raycast Demo](https://img.shields.io/badge/Demo-Raycasting-blue)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Send a donation if you like my work!](https://cash.app/$AidanTheBandit) 
+[![Send a donation if you like my work!](https://img.shields.io/badge/Donate-CashApp-brightgreen)](https://cash.app/$AidanTheBandit)
 
 ## 🎮 Overview
 
